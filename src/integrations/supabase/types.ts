@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      procedures: {
+        Row: {
+          created_at: string
+          id: string
+          patient_name: string
+          procedure_date: string
+          procedure_type: string
+          supervisor_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patient_name: string
+          procedure_date: string
+          procedure_type: string
+          supervisor_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patient_name?: string
+          procedure_date?: string
+          procedure_type?: string
+          supervisor_name?: string
+        }
+        Relationships: []
+      }
+      quota_targets: {
+        Row: {
+          id: string
+          procedure_type: string
+          target: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          procedure_type: string
+          target?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          procedure_type?: string
+          target?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
