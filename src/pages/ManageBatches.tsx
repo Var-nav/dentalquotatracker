@@ -108,8 +108,8 @@ const ManageBatchesPage = () => {
     }
   };
 
-  const grouped = batches.reduce<Record<string, BatchRow[]>>((acc, b) => {
-    const key = `${b.academic_year ?? "Unknown"} • ${b.intake_label ?? "Unlabelled"}`;
+  const groupedByYear = batches.reduce<Record<string, BatchRow[]>>((acc, b) => {
+    const key = b.academic_year || "Academic year not set";
     acc[key] = acc[key] || [];
     acc[key].push(b);
     return acc;
@@ -187,26 +187,42 @@ const ManageBatchesPage = () => {
             </p>
           ) : (
             <div className="space-y-4">
-              {Object.entries(grouped).map(([groupKey, groupBatches]) => (
-                <div key={groupKey} className="space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    {groupKey}
-                  </p>
-                  <ul className="text-sm text-foreground grid gap-1 md:grid-cols-2">
-                    {groupBatches.map((b) => (
-                      <li
-                        key={b.id}
-                        className="rounded-lg border border-border/60 bg-card/70 px-3 py-2 flex items-center justify-between"
-                      >
-                        <span className="font-medium">{b.name}</span>
-                        <span className="text-[11px] text-muted-foreground">
-                          {b.year_of_study || "Year not set"}
-                        </span>
-                      </li>
+              {Object.entries(groupedByYear).map(([academicYearKey, yearBatches]) => {
+                const intakes = yearBatches.reduce<Record<string, BatchRow[]>>((acc, b) => {
+                  const key = b.intake_label || "Unlabelled intake";
+                  acc[key] = acc[key] || [];
+                  acc[key].push(b);
+                  return acc;
+                }, {});
+
+                return (
+                  <div key={academicYearKey} className="space-y-3">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      {academicYearKey}
+                    </p>
+                    {Object.entries(intakes).map(([intakeKey, intakeBatches]) => (
+                      <div key={intakeKey} className="space-y-1 pl-2 border-l border-border/60">
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                          {intakeKey}
+                        </p>
+                        <ul className="text-sm text-foreground grid gap-1 md:grid-cols-2">
+                          {intakeBatches.map((b) => (
+                            <li
+                              key={b.id}
+                              className="rounded-lg border border-border/60 bg-card/70 px-3 py-2 flex items-center justify-between"
+                            >
+                              <span className="font-medium">{b.name}</span>
+                              <span className="text-[11px] text-muted-foreground">
+                                {b.year_of_study || "Year not set"}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           )}
         </CardContent>
