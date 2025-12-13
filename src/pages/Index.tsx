@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useQuotaTasks } from "@/hooks/useQuotaTasks";
 import { DepartmentAccordion } from "@/components/DepartmentAccordion";
+import { DepartmentAnalytics } from "@/components/DepartmentAnalytics";
 import { Target } from "lucide-react";
 
 const Index = () => {
@@ -96,6 +97,8 @@ const Index = () => {
               )}
             </CardContent>
           </Card>
+
+          <DepartmentAnalytics />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Card className="border border-info/20 bg-gradient-to-br from-card via-info/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
