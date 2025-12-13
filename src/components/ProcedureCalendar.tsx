@@ -67,8 +67,8 @@ export const ProcedureCalendar = ({ procedures }: ProcedureCalendarProps) => {
 
   return (
     <>
-      <Card className="relative overflow-hidden border border-primary/10 bg-card/80 shadow-soft backdrop-blur-sm">
-        <div className="pointer-events-none absolute -top-10 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full bg-[hsl(var(--primary-soft))] opacity-30 blur-3xl" />
+      <Card className="relative overflow-hidden border border-yellow/20 bg-gradient-to-br from-card via-yellow/5 to-card shadow-soft backdrop-blur-sm">
+        <div className="pointer-events-none absolute -top-10 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full bg-yellow opacity-20 blur-3xl" />
         <CardHeader className="relative z-10">
           <CardTitle className="text-base sm:text-lg">Procedure calendar</CardTitle>
           <p className="text-xs text-muted-foreground sm:text-sm">

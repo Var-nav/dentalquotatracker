@@ -195,7 +195,7 @@ const Index = () => {
   const isLoading = proceduresLoading || targetsLoading;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_hsl(var(--medical-bg))/80%,_hsl(var(--background)))] text-foreground">
+    <div className="min-h-screen bg-gradient-to-br from-purple/5 via-background to-teal/5 text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -220,7 +220,7 @@ const Index = () => {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Clinical tracker
             </p>
-            <h1 className="bg-clip-text text-2xl font-semibold tracking-tight text-transparent sm:text-3xl md:text-4xl lg:text-5xl bg-gradient-to-r from-primary to-[hsl(var(--accent-strong))]">
+            <h1 className="bg-clip-text text-2xl font-semibold tracking-tight text-transparent sm:text-3xl md:text-4xl lg:text-5xl bg-gradient-to-r from-purple via-primary to-teal">
               Dental Clinical Quota Dashboard
             </h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
@@ -228,17 +228,17 @@ const Index = () => {
               graduation deadlines.
             </p>
           </div>
-          <div className="hidden shrink-0 items-center rounded-full border bg-card/80 px-4 py-2 text-xs shadow-soft md:flex">
-            <span className="mr-2 inline-flex h-2 w-2 animate-pulse rounded-full bg-[hsl(var(--accent-strong))]" />
-            <span className="font-medium">Today&apos;s progress</span>
+          <div className="hidden shrink-0 items-center rounded-full border border-success/20 bg-success/10 px-4 py-2 text-xs shadow-soft md:flex">
+            <span className="mr-2 inline-flex h-2 w-2 animate-pulse rounded-full bg-success" />
+            <span className="font-medium text-success-foreground">Today&apos;s progress</span>
           </div>
         </header>
 
         <main className="flex flex-1 flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-[minmax(0,_3fr)_minmax(280px,_2fr)] lg:grid-cols-[minmax(0,_3.2fr)_minmax(320px,_2fr)]">
           <section className="space-y-4">
-            <Card className="relative overflow-hidden border border-primary/10 bg-card/80 shadow-soft backdrop-blur-sm">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--primary-soft))] opacity-40 blur-3xl" />
+            <Card className="relative overflow-hidden border border-purple/20 bg-gradient-to-br from-card via-purple/5 to-card shadow-soft backdrop-blur-sm">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-purple opacity-20 blur-3xl" />
               <CardHeader className="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base sm:text-lg">Quota overview</CardTitle>
                 <p className="text-xs text-muted-foreground sm:text-sm">
@@ -253,13 +253,21 @@ const Index = () => {
                     const count = stats[type];
                     const target = targetsMap[type] || 1;
                     const percent = Math.min(100, Math.round((count / target) * 100));
+                    
+                    // Assign colors based on procedure type
+                    const colorMap: Record<ProcedureType, string> = {
+                      Restorations: "green",
+                      Extractions: "orange",
+                      "Root Canals": "purple",
+                    };
+                    const color = colorMap[type];
 
                     return (
                       <button
                         key={type}
                         type="button"
-                        className="group flex w-full flex-col gap-1 rounded-lg border border-border/60 bg-background/60 p-3 text-left transition-[transform,box-shadow,background]
-                                   hover:-translate-y-[1px] hover:bg-background/90 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className={`group flex w-full flex-col gap-1 rounded-lg border border-${color}/30 bg-${color}/5 p-3 text-left transition-all
+                                   hover:-translate-y-[1px] hover:bg-${color}/10 hover:shadow-lg hover:shadow-${color}/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-${color}`}
                       >
                         <div className="flex items-center justify-between text-xs font-medium sm:text-sm">
                           <span>{type}</span>
@@ -270,7 +278,7 @@ const Index = () => {
                         <div className="mt-1 flex items-center gap-3">
                           <Progress
                             value={percent}
-                            className="h-2 flex-1 overflow-hidden rounded-full bg-muted"
+                            className={`h-2 flex-1 overflow-hidden rounded-full bg-${color}/20 [&>div]:bg-${color}`}
                           />
                           <span className="w-10 text-right text-xs tabular-nums text-muted-foreground">
                             {percent}%
@@ -283,11 +291,12 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="relative overflow-hidden bg-card/90 shadow-soft">
-              <CardHeader>
+            <Card className="relative overflow-hidden border border-teal/20 bg-gradient-to-br from-card via-teal/5 to-card shadow-soft">/
+              <div className="pointer-events-none absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-teal opacity-20 blur-3xl" />
+              <CardHeader className="relative z-10">
                 <CardTitle className="text-base sm:text-lg">Case history</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="relative z-10 space-y-2">
                 {isLoading ? (
                   <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-4 text-center text-xs text-muted-foreground sm:text-sm">
                     Loading your cases...
@@ -298,10 +307,18 @@ const Index = () => {
                   </div>
                 ) : (
                   <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
-                    {procedures.map((entry) => (
+                    {procedures.map((entry) => {
+                      const colorMap: Record<ProcedureType, string> = {
+                        Restorations: "green",
+                        Extractions: "orange",
+                        "Root Canals": "purple",
+                      };
+                      const entryColor = colorMap[entry.procedure_type as ProcedureType];
+                      
+                      return (
                       <div
                         key={entry.id}
-                        className="group flex items-center gap-2 rounded-md border border-border/60 bg-background/80 p-3 text-xs transition-colors hover:bg-background sm:text-sm"
+                        className={`group flex items-center gap-2 rounded-md border border-${entryColor}/30 bg-${entryColor}/5 p-3 text-xs transition-colors hover:bg-${entryColor}/10 sm:text-sm`}
                       >
                         <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <div>
@@ -338,7 +355,8 @@ const Index = () => {
                           </Button>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 )}
               </CardContent>
@@ -346,11 +364,12 @@ const Index = () => {
           </section>
 
           <section className="space-y-4">
-            <Card className="border border-primary/10 bg-card/90 shadow-soft">
-              <CardHeader>
+            <Card className="border border-pink/20 bg-gradient-to-br from-card via-pink/5 to-card shadow-soft">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-pink opacity-20 blur-3xl" />
+              <CardHeader className="relative z-10">
                 <CardTitle className="text-base sm:text-lg">Add patient case</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative z-10">
                 <form onSubmit={handleAddEntry} className="space-y-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="patientName">Patient name</Label>
@@ -403,18 +422,19 @@ const Index = () => {
                     />
                   </div>
 
-                  <Button type="submit" className="mt-1 w-full" disabled={isLoading}>
+                  <Button type="submit" className="mt-1 w-full bg-gradient-to-r from-pink to-purple hover:from-pink/90 hover:to-purple/90" disabled={isLoading}>
                     Log case
                   </Button>
                 </form>
               </CardContent>
             </Card>
 
-            <Card className="border border-border bg-card/90 shadow-soft">
-              <CardHeader>
+            <Card className="border border-orange/20 bg-gradient-to-br from-card via-orange/5 to-card shadow-soft">
+              <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-orange opacity-20 blur-3xl" />
+              <CardHeader className="relative z-10">
                 <CardTitle className="text-base sm:text-lg">Quota goals</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="relative z-10 space-y-3">
                 <p className="text-xs text-muted-foreground sm:text-sm">
                   Adjust your target number of cases for each category to match your school or
                   clinic requirements.
@@ -441,7 +461,7 @@ const Index = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-orange to-yellow hover:from-orange/90 hover:to-yellow/90"
                   onClick={handleSaveTargets}
                   disabled={isLoading}
                 >
