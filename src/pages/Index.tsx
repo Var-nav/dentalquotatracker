@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProgressCharts } from "@/components/ProgressCharts";
+import { ProcedureCalendar } from "@/components/ProcedureCalendar";
 import { useToast } from "@/hooks/use-toast";
 import { useProcedures, ProcedureType } from "@/hooks/useProcedures";
 import { useQuotaTargets } from "@/hooks/useQuotaTargets";
@@ -385,6 +386,8 @@ const Index = () => {
           </div>
 
           <ProgressCharts procedures={procedures} targets={targetsMap} />
+
+          <ProcedureCalendar procedures={procedures} />
         </main>
 
         <footer className="mt-6 flex items-center justify-between gap-4 border-t pt-3 text-[0.7rem] text-muted-foreground sm:text-xs">
