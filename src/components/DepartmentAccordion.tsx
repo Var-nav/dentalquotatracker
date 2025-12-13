@@ -73,32 +73,77 @@ export const DepartmentAccordion = ({ department, tasks }: DepartmentAccordionPr
     return procedures.filter(p => p.quota_task_id === taskId).length;
   };
 
-  const departmentColors: Record<string, string> = {
-    'Oral Maxillofacial Surgery': 'from-red-500 to-orange-500',
-    'Oral Medicine and Radiology': 'from-blue-500 to-cyan-500',
-    'Periodontics': 'from-green-500 to-emerald-500',
-    'Pediatric Dentistry': 'from-pink-500 to-rose-500',
-    'Endodontics': 'from-purple-500 to-violet-500',
-    'Prosthodontics': 'from-amber-500 to-yellow-500',
-    'Orthodontics': 'from-indigo-500 to-blue-500',
-    'Public Health Dentistry': 'from-teal-500 to-green-500',
+  const departmentColors: Record<string, { gradient: string; border: string; bg: string; text: string }> = {
+    'Oral Maxillofacial Surgery': { 
+      gradient: 'from-red-500 to-orange-500',
+      border: 'border-red-500/30',
+      bg: 'bg-red-500/5 hover:bg-red-500/10',
+      text: 'text-red-600 dark:text-red-400'
+    },
+    'Oral Medicine and Radiology': { 
+      gradient: 'from-blue-500 to-cyan-500',
+      border: 'border-blue-500/30',
+      bg: 'bg-blue-500/5 hover:bg-blue-500/10',
+      text: 'text-blue-600 dark:text-blue-400'
+    },
+    'Periodontics': { 
+      gradient: 'from-green-500 to-emerald-500',
+      border: 'border-green-500/30',
+      bg: 'bg-green-500/5 hover:bg-green-500/10',
+      text: 'text-green-600 dark:text-green-400'
+    },
+    'Pediatric Dentistry': { 
+      gradient: 'from-pink-500 to-rose-500',
+      border: 'border-pink-500/30',
+      bg: 'bg-pink-500/5 hover:bg-pink-500/10',
+      text: 'text-pink-600 dark:text-pink-400'
+    },
+    'Endodontics': { 
+      gradient: 'from-purple-500 to-violet-500',
+      border: 'border-purple-500/30',
+      bg: 'bg-purple-500/5 hover:bg-purple-500/10',
+      text: 'text-purple-600 dark:text-purple-400'
+    },
+    'Prosthodontics': { 
+      gradient: 'from-amber-500 to-yellow-500',
+      border: 'border-amber-500/30',
+      bg: 'bg-amber-500/5 hover:bg-amber-500/10',
+      text: 'text-amber-600 dark:text-amber-400'
+    },
+    'Orthodontics': { 
+      gradient: 'from-indigo-500 to-blue-600',
+      border: 'border-indigo-500/30',
+      bg: 'bg-indigo-500/5 hover:bg-indigo-500/10',
+      text: 'text-indigo-600 dark:text-indigo-400'
+    },
+    'Public Health Dentistry': { 
+      gradient: 'from-teal-500 to-green-600',
+      border: 'border-teal-500/30',
+      bg: 'bg-teal-500/5 hover:bg-teal-500/10',
+      text: 'text-teal-600 dark:text-teal-400'
+    },
   };
 
-  const gradientClass = departmentColors[department.name] || 'from-primary to-secondary';
+  const colors = departmentColors[department.name] || { 
+    gradient: 'from-primary to-secondary',
+    border: 'border-primary/30',
+    bg: 'bg-primary/5 hover:bg-primary/10',
+    text: 'text-primary'
+  };
 
   return (
     <AccordionItem 
       value={department.id} 
-      className="border border-border/50 rounded-lg px-4 mb-3 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 animate-fade-in"
+      className={`border ${colors.border} rounded-lg px-4 mb-3 ${colors.bg} backdrop-blur-sm transition-all duration-300 animate-fade-in shadow-sm hover:shadow-lg`}
     >
       <AccordionTrigger className="hover:no-underline py-4">
         <div className="flex items-center justify-between w-full pr-4">
           <div className="flex items-center gap-3">
-            <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${gradientClass} flex items-center justify-center shadow-lg`}>
+            <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${colors.gradient} flex items-center justify-center shadow-lg ring-2 ring-white/20`}>
               <Target className="h-5 w-5 text-white" />
             </div>
             <div className="text-left">
-              <h3 className="font-semibold text-lg text-foreground">{department.name}</h3>
+              <h3 className={`font-semibold text-lg ${colors.text}`}>{department.name}</h3>
               <p className="text-sm text-muted-foreground">{tasks.length} quota tasks</p>
             </div>
           </div>
@@ -113,7 +158,7 @@ export const DepartmentAccordion = ({ department, tasks }: DepartmentAccordionPr
             return (
               <div
                 key={task.id}
-                className="p-4 rounded-lg border border-border/50 bg-background/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                className={`p-4 rounded-lg border ${colors.border} ${colors.bg} hover:shadow-md transition-all duration-300 hover:-translate-y-1`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="flex items-center justify-between mb-3">
