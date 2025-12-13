@@ -135,7 +135,7 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
 
   return (
     <div className="space-y-4">
-      <Card className="relative overflow-hidden border border-info/20 bg-gradient-to-br from-card via-info/5 to-card shadow-soft backdrop-blur-sm">
+      <Card className="relative overflow-hidden border border-info/20 bg-gradient-to-br from-card via-info/5 to-card shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up">
         <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-info opacity-20 blur-3xl" />
         <CardHeader className="relative z-10">
           <CardTitle className="text-base sm:text-lg">Weekly progress</CardTitle>
@@ -188,7 +188,7 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
         </CardContent>
       </Card>
 
-      <Card className="relative overflow-hidden border border-success/20 bg-gradient-to-br from-card via-success/5 to-card shadow-soft backdrop-blur-sm">
+      <Card className="relative overflow-hidden border border-success/20 bg-gradient-to-br from-card via-success/5 to-card shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
         <div className="pointer-events-none absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-success opacity-20 blur-3xl" />
         <CardHeader className="relative z-10">
           <CardTitle className="text-base sm:text-lg">Projected completion</CardTitle>
@@ -208,7 +208,8 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
             return (
             <div
               key={proj.type}
-              className={`flex flex-col gap-2 rounded-lg border border-${projColor}/30 bg-${projColor}/5 p-3 sm:flex-row sm:items-center sm:justify-between`}
+              className={`flex flex-col gap-2 rounded-lg border border-${projColor}/30 bg-${projColor}/5 p-3 transition-all duration-300 hover:bg-${projColor}/10 hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between animate-fade-in`}
+              style={{ animationDelay: `${0.05 * projections.indexOf(proj)}s` }}
             >
               <div className="flex-1">
                 <div className="text-xs font-medium sm:text-sm">{proj.type}</div>
@@ -219,11 +220,11 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
               </div>
               <div className="flex items-center gap-2">
                 {proj.projectedDate === "Completed" ? (
-                  <span className="rounded-full bg-success/20 px-3 py-1 text-xs font-medium text-success">
+                  <span className="rounded-full bg-success/20 px-3 py-1 text-xs font-medium text-success transition-all duration-200 hover:scale-105">
                     ✓ Completed
                   </span>
                 ) : proj.projectedDate === "Needs more data" ? (
-                  <span className="rounded-full bg-warning/20 px-3 py-1 text-xs font-medium text-warning">
+                  <span className="rounded-full bg-warning/20 px-3 py-1 text-xs font-medium text-warning transition-all duration-200 hover:scale-105">
                     Needs data
                   </span>
                 ) : (

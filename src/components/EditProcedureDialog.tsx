@@ -72,7 +72,7 @@ export const EditProcedureDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md animate-scale-in">
         <DialogHeader>
           <DialogTitle>Edit procedure</DialogTitle>
         </DialogHeader>
@@ -85,6 +85,7 @@ export const EditProcedureDialog = ({
               onChange={(e) => setPatientName(e.target.value)}
               placeholder="e.g. J. Smith"
               autoComplete="off"
+              className="transition-all duration-200 focus:scale-[1.02]"
             />
           </div>
 
@@ -94,7 +95,7 @@ export const EditProcedureDialog = ({
               value={procedureType || ""}
               onValueChange={(value) => setProcedureType(value as ProcedureType)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="transition-all duration-200 focus:scale-[1.02]">
                 <SelectValue placeholder="Select procedure" />
               </SelectTrigger>
               <SelectContent>
@@ -114,6 +115,7 @@ export const EditProcedureDialog = ({
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              className="transition-all duration-200 focus:scale-[1.02]"
             />
           </div>
 
@@ -125,14 +127,15 @@ export const EditProcedureDialog = ({
               onChange={(e) => setSupervisorName(e.target.value)}
               placeholder="e.g. Dr. Patel"
               autoComplete="off"
+              className="transition-all duration-200 focus:scale-[1.02]"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving} className="transition-all duration-200 hover:scale-105 active:scale-95">
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
+          <Button onClick={handleSave} disabled={isSaving} className="transition-all duration-200 hover:scale-105 active:scale-95">
             {isSaving ? "Saving..." : "Save changes"}
           </Button>
         </DialogFooter>

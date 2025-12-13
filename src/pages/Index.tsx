@@ -214,7 +214,7 @@ const Index = () => {
         }}
       />
 
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8 animate-fade-in">
         <header className="mb-6 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -228,7 +228,7 @@ const Index = () => {
               graduation deadlines.
             </p>
           </div>
-          <div className="hidden shrink-0 items-center rounded-full border border-success/20 bg-success/10 px-4 py-2 text-xs shadow-soft md:flex">
+          <div className="hidden shrink-0 items-center rounded-full border border-success/20 bg-success/10 px-4 py-2 text-xs shadow-soft transition-all duration-300 hover:scale-105 hover:shadow-lg md:flex">
             <span className="mr-2 inline-flex h-2 w-2 animate-pulse rounded-full bg-success" />
             <span className="font-medium text-success-foreground">Today&apos;s progress</span>
           </div>
@@ -237,7 +237,7 @@ const Index = () => {
         <main className="flex flex-1 flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-[minmax(0,_3fr)_minmax(280px,_2fr)] lg:grid-cols-[minmax(0,_3.2fr)_minmax(320px,_2fr)]">
           <section className="space-y-4">
-            <Card className="relative overflow-hidden border border-purple/20 bg-gradient-to-br from-card via-purple/5 to-card shadow-soft backdrop-blur-sm">
+            <Card className="relative overflow-hidden border border-purple/20 bg-gradient-to-br from-card via-purple/5 to-card shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up">
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-purple opacity-20 blur-3xl" />
               <CardHeader className="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base sm:text-lg">Quota overview</CardTitle>
@@ -266,8 +266,8 @@ const Index = () => {
                       <button
                         key={type}
                         type="button"
-                        className={`group flex w-full flex-col gap-1 rounded-lg border border-${color}/30 bg-${color}/5 p-3 text-left transition-all
-                                   hover:-translate-y-[1px] hover:bg-${color}/10 hover:shadow-lg hover:shadow-${color}/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-${color}`}
+                        className={`group flex w-full flex-col gap-1 rounded-lg border border-${color}/30 bg-${color}/5 p-3 text-left transition-all duration-300
+                                   hover:-translate-y-[2px] hover:bg-${color}/10 hover:shadow-lg hover:shadow-${color}/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-${color}`}
                       >
                         <div className="flex items-center justify-between text-xs font-medium sm:text-sm">
                           <span>{type}</span>
@@ -278,9 +278,9 @@ const Index = () => {
                         <div className="mt-1 flex items-center gap-3">
                           <Progress
                             value={percent}
-                            className={`h-2 flex-1 overflow-hidden rounded-full bg-${color}/20 [&>div]:bg-${color}`}
+                            className={`h-2 flex-1 overflow-hidden rounded-full bg-${color}/20 [&>div]:bg-${color} [&>div]:transition-all [&>div]:duration-500`}
                           />
-                          <span className="w-10 text-right text-xs tabular-nums text-muted-foreground">
+                          <span className="w-10 text-right text-xs tabular-nums text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
                             {percent}%
                           </span>
                         </div>
@@ -291,7 +291,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="relative overflow-hidden border border-teal/20 bg-gradient-to-br from-card via-teal/5 to-card shadow-soft">/
+            <Card className="relative overflow-hidden border border-teal/20 bg-gradient-to-br from-card via-teal/5 to-card shadow-soft transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>/
               <div className="pointer-events-none absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-teal opacity-20 blur-3xl" />
               <CardHeader className="relative z-10">
                 <CardTitle className="text-base sm:text-lg">Case history</CardTitle>
@@ -318,7 +318,8 @@ const Index = () => {
                       return (
                       <div
                         key={entry.id}
-                        className={`group flex items-center gap-2 rounded-md border border-${entryColor}/30 bg-${entryColor}/5 p-3 text-xs transition-colors hover:bg-${entryColor}/10 sm:text-sm`}
+                        className={`group flex items-center gap-2 rounded-md border border-${entryColor}/30 bg-${entryColor}/5 p-3 text-xs transition-all duration-300 hover:bg-${entryColor}/10 hover:-translate-y-0.5 hover:shadow-md animate-fade-in sm:text-sm`}
+                        style={{ animationDelay: `${procedures.indexOf(entry) * 0.05}s` }}
                       >
                         <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <div>
@@ -334,11 +335,11 @@ const Index = () => {
                             </span>
                           </div>
                         </div>
-                        <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div className="flex shrink-0 gap-1 opacity-0 transition-all duration-300 group-hover:opacity-100">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7"
+                            className="h-7 w-7 transition-all duration-200 hover:scale-110 active:scale-95"
                             onClick={() => handleEditProcedure(entry)}
                             title="Edit case"
                           >
@@ -347,7 +348,7 @@ const Index = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            className="h-7 w-7 text-destructive transition-all duration-200 hover:scale-110 hover:bg-destructive/10 hover:text-destructive active:scale-95"
                             onClick={() => handleDeleteProcedure(entry.id, entry.patient_name)}
                             title="Delete case"
                           >
@@ -364,14 +365,14 @@ const Index = () => {
           </section>
 
           <section className="space-y-4">
-            <Card className="border border-pink/20 bg-gradient-to-br from-card via-pink/5 to-card shadow-soft">
+            <Card className="border border-pink/20 bg-gradient-to-br from-card via-pink/5 to-card shadow-soft transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-pink opacity-20 blur-3xl" />
               <CardHeader className="relative z-10">
                 <CardTitle className="text-base sm:text-lg">Add patient case</CardTitle>
               </CardHeader>
               <CardContent className="relative z-10">
                 <form onSubmit={handleAddEntry} className="space-y-3">
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 animate-fade-in" style={{ animationDelay: "0.05s" }}>
                     <Label htmlFor="patientName">Patient name</Label>
                     <Input
                       id="patientName"
@@ -379,10 +380,11 @@ const Index = () => {
                       onChange={(e) => setPatientName(e.target.value)}
                       placeholder="e.g. J. Smith"
                       autoComplete="off"
+                      className="transition-all duration-200 focus:scale-[1.02]"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
                     <Label>Procedure type</Label>
                     <Select
                       value={procedureType || ""}
@@ -401,17 +403,18 @@ const Index = () => {
                     </Select>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 animate-fade-in" style={{ animationDelay: "0.15s" }}>
                     <Label htmlFor="date">Date</Label>
                     <Input
                       id="date"
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
+                      className="transition-all duration-200 focus:scale-[1.02]"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 animate-fade-in" style={{ animationDelay: "0.2s" }}>
                     <Label htmlFor="supervisorName">Supervisor</Label>
                     <Input
                       id="supervisorName"
@@ -422,7 +425,7 @@ const Index = () => {
                     />
                   </div>
 
-                  <Button type="submit" className="mt-1 w-full bg-gradient-to-r from-pink to-purple hover:from-pink/90 hover:to-purple/90" disabled={isLoading}>
+                  <Button type="submit" className="mt-1 w-full bg-gradient-to-r from-pink to-purple hover:from-pink/90 hover:to-purple/90 transition-all duration-300 hover:scale-[1.02] active:scale-95" disabled={isLoading}>
                     Log case
                   </Button>
                 </form>
@@ -461,7 +464,7 @@ const Index = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full bg-gradient-to-r from-orange to-yellow hover:from-orange/90 hover:to-yellow/90"
+                  className="w-full bg-gradient-to-r from-orange to-yellow hover:from-orange/90 hover:to-yellow/90 transition-all duration-300 hover:scale-[1.02] active:scale-95"
                   onClick={handleSaveTargets}
                   disabled={isLoading}
                 >
