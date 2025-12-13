@@ -14,22 +14,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useProcedures, ProcedureType } from "@/hooks/useProcedures";
+import { useQuotaTargets } from "@/hooks/useQuotaTargets";
 
-const PROCEDURE_TYPES = ["Restorations", "Extractions", "Root Canals"] as const;
+const PROCEDURE_TYPES: ProcedureType[] = ["Restorations", "Extractions", "Root Canals"];
 
-type ProcedureType = (typeof PROCEDURE_TYPES)[number];
-
-interface ProcedureEntry {
-  id: number;
-  patientName: string;
-  procedureType: ProcedureType;
-  date: string; // ISO string
-  supervisorName: string;
-}
-
-type Targets = Record<ProcedureType, number>;
-
-const INITIAL_TARGETS: Targets = {
+const INITIAL_TARGETS: Record<ProcedureType, number> = {
   Restorations: 40,
   Extractions: 50,
   "Root Canals": 25,
@@ -38,15 +28,26 @@ const INITIAL_TARGETS: Targets = {
 const Index = () => {
   const { toast } = useToast();
 
-  const [entries, setEntries] = useState<ProcedureEntry[]>([]);
-  const [targets, setTargets] = useState<Targets>(INITIAL_TARGETS);
+  const { procedures, isLoading: proceduresLoading, addProcedure } = useProcedures();
+  const { targets, isLoading: targetsLoading, updateTarget } = useQuotaTargets();
 
   const [patientName, setPatientName] = useState("");
   const [procedureType, setProcedureType] = useState<ProcedureType | "">("");
   const [date, setDate] = useState<string>("");
   const [supervisorName, setSupervisorName] = useState("");
 
-  const [editingTargets, setEditingTargets] = useState<Targets>(INITIAL_TARGETS);
+  const [editingTargets, setEditingTargets] = useState<Record<ProcedureType, number>>(INITIAL_TARGETS);
+
+  // Sync editingTargets with backend targets on load
+  useMemo(() => {
+    if (targets.length > 0) {
+      const backendTargets = targets.reduce(
+        (acc, t) => ({ ...acc, [t.procedure_type]: t.target }),
+        {} as Record<ProcedureType, number>
+      );
+      setEditingTargets((prev) => ({ ...prev, ...backendTargets }));
+    }
+  }, [targets]);
 
   const stats = useMemo(() => {
     const counts: Record<ProcedureType, number> = {
@@ -55,14 +56,21 @@ const Index = () => {
       "Root Canals": 0,
     };
 
-    for (const entry of entries) {
-      counts[entry.procedureType]++;
+    for (const entry of procedures) {
+      counts[entry.procedure_type as ProcedureType]++;
     }
 
     return counts;
-  }, [entries]);
+  }, [procedures]);
 
-  const handleAddEntry = (e: React.FormEvent) => {
+  const targetsMap = useMemo(() => {
+    return targets.reduce(
+      (acc, t) => ({ ...acc, [t.procedure_type]: t.target }),
+      INITIAL_TARGETS
+    );
+  }, [targets]);
+
+  const handleAddEntry = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!patientName.trim() || !procedureType || !date || !supervisorName.trim()) {
@@ -73,24 +81,30 @@ const Index = () => {
       return;
     }
 
-    const newEntry: ProcedureEntry = {
-      id: Date.now(),
-      patientName: patientName.trim(),
-      procedureType: procedureType as ProcedureType,
-      date,
-      supervisorName: supervisorName.trim(),
-    };
+    try {
+      await addProcedure({
+        patient_name: patientName.trim(),
+        procedure_type: procedureType as ProcedureType,
+        procedure_date: date,
+        supervisor_name: supervisorName.trim(),
+      });
 
-    setEntries((prev) => [newEntry, ...prev]);
-    setPatientName("");
-    setProcedureType("");
-    setDate("");
-    setSupervisorName("");
+      setPatientName("");
+      setProcedureType("");
+      setDate("");
+      setSupervisorName("");
 
-    toast({
-      title: "Case added",
-      description: `${newEntry.procedureType} for ${newEntry.patientName} recorded.`,
-    });
+      toast({
+        title: "Case added",
+        description: `${procedureType} for ${patientName.trim()} recorded.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error adding case",
+        description: "Could not save the case. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleTargetChange = (type: ProcedureType, value: string) => {
@@ -103,24 +117,38 @@ const Index = () => {
     }));
   };
 
-  const handleSaveTargets = () => {
-    const sanitized: Targets = { ...editingTargets };
-    (Object.keys(sanitized) as ProcedureType[]).forEach((key) => {
-      if (!sanitized[key] || sanitized[key] < 1) {
-        sanitized[key] = 1;
-      }
-    });
+  const handleSaveTargets = async () => {
+    try {
+      const sanitized: Record<ProcedureType, number> = { ...editingTargets };
+      (Object.keys(sanitized) as ProcedureType[]).forEach((key) => {
+        if (!sanitized[key] || sanitized[key] < 1) {
+          sanitized[key] = 1;
+        }
+      });
 
-    setTargets(sanitized);
-    toast({
-      title: "Goals updated",
-      description: "Clinical quota targets have been updated.",
-    });
+      await Promise.all(
+        (Object.keys(sanitized) as ProcedureType[]).map((type) =>
+          updateTarget({ procedure_type: type, target: sanitized[type] })
+        )
+      );
+
+      toast({
+        title: "Goals updated",
+        description: "Clinical quota targets have been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error updating goals",
+        description: "Could not save goals. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+
+  const isLoading = proceduresLoading || targetsLoading;
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_hsl(var(--medical-bg))/80%,_hsl(var(--background)))] text-foreground">
-      {/* SEO: structured data for the dashboard */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -161,7 +189,6 @@ const Index = () => {
 
         <main className="grid flex-1 gap-4 md:grid-cols-[minmax(0,_3fr)_minmax(280px,_2fr)] lg:grid-cols-[minmax(0,_3.2fr)_minmax(320px,_2fr)]">
           <section className="space-y-4">
-            {/* Progress overview */}
             <Card className="relative overflow-hidden border border-primary/10 bg-card/80 shadow-soft backdrop-blur-sm">
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--primary-soft))] opacity-40 blur-3xl" />
               <CardHeader className="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -171,65 +198,73 @@ const Index = () => {
                 </p>
               </CardHeader>
               <CardContent className="relative z-10 space-y-4">
-                {PROCEDURE_TYPES.map((type) => {
-                  const count = stats[type];
-                  const target = targets[type] || 1;
-                  const percent = Math.min(100, Math.round((count / target) * 100));
+                {isLoading ? (
+                  <div className="text-center text-sm text-muted-foreground">Loading...</div>
+                ) : (
+                  PROCEDURE_TYPES.map((type) => {
+                    const count = stats[type];
+                    const target = targetsMap[type] || 1;
+                    const percent = Math.min(100, Math.round((count / target) * 100));
 
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      className="group flex w-full flex-col gap-1 rounded-lg border border-border/60 bg-background/60 p-3 text-left transition-[transform,box-shadow,background]
-                                 hover:-translate-y-[1px] hover:bg-background/90 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <div className="flex items-center justify-between text-xs font-medium sm:text-sm">
-                        <span>{type}</span>
-                        <span className="text-muted-foreground">
-                          {count} / {target} cases
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-center gap-3">
-                        <Progress
-                          value={percent}
-                          className="h-2 flex-1 overflow-hidden rounded-full bg-muted"
-                        />
-                        <span className="w-10 text-right text-xs tabular-nums text-muted-foreground">
-                          {percent}%
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        className="group flex w-full flex-col gap-1 rounded-lg border border-border/60 bg-background/60 p-3 text-left transition-[transform,box-shadow,background]
+                                   hover:-translate-y-[1px] hover:bg-background/90 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <div className="flex items-center justify-between text-xs font-medium sm:text-sm">
+                          <span>{type}</span>
+                          <span className="text-muted-foreground">
+                            {count} / {target} cases
+                          </span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-3">
+                          <Progress
+                            value={percent}
+                            className="h-2 flex-1 overflow-hidden rounded-full bg-muted"
+                          />
+                          <span className="w-10 text-right text-xs tabular-nums text-muted-foreground">
+                            {percent}%
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
 
-            {/* History list */}
             <Card className="relative overflow-hidden bg-card/90 shadow-soft">
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg">Case history</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {entries.length === 0 ? (
+                {isLoading ? (
+                  <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-4 text-center text-xs text-muted-foreground sm:text-sm">
+                    Loading your cases...
+                  </div>
+                ) : procedures.length === 0 ? (
                   <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-4 text-center text-xs text-muted-foreground sm:text-sm">
                     Your recent procedures will appear here. Start by adding a case on the right.
                   </div>
                 ) : (
                   <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
-                    {entries.map((entry) => (
+                    {procedures.map((entry) => (
                       <div
                         key={entry.id}
                         className="flex flex-col gap-1 rounded-md border border-border/60 bg-background/80 p-3 text-xs sm:flex-row sm:items-center sm:justify-between sm:text-sm"
                       >
                         <div>
-                          <div className="font-medium text-foreground">{entry.patientName}</div>
+                          <div className="font-medium text-foreground">{entry.patient_name}</div>
                           <div className="mt-0.5 text-[0.7rem] uppercase tracking-[0.16em] text-muted-foreground">
-                            {entry.procedureType}
+                            {entry.procedure_type}
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.7rem] text-muted-foreground sm:text-xs">
                           <span>
-                            {format(new Date(entry.date), "MMM d, yyyy")} · {entry.supervisorName}
+                            {format(new Date(entry.procedure_date), "MMM d, yyyy")} ·{" "}
+                            {entry.supervisor_name}
                           </span>
                         </div>
                       </div>
@@ -240,7 +275,6 @@ const Index = () => {
             </Card>
           </section>
 
-          {/* Right column: Add entry + goals */}
           <section className="space-y-4">
             <Card className="border border-primary/10 bg-card/90 shadow-soft">
               <CardHeader>
@@ -299,7 +333,7 @@ const Index = () => {
                     />
                   </div>
 
-                  <Button type="submit" className="mt-1 w-full">
+                  <Button type="submit" className="mt-1 w-full" disabled={isLoading}>
                     Log case
                   </Button>
                 </form>
@@ -326,7 +360,7 @@ const Index = () => {
                         type="number"
                         min={1}
                         inputMode="numeric"
-                        value={editingTargets[type].toString()}
+                        value={editingTargets[type]?.toString() || ""}
                         onChange={(e) => handleTargetChange(type, e.target.value)}
                         className="h-8 flex-1 text-xs sm:h-9 sm:text-sm"
                       />
@@ -334,7 +368,13 @@ const Index = () => {
                   ))}
                 </div>
 
-                <Button type="button" variant="outline" className="w-full" onClick={handleSaveTargets}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleSaveTargets}
+                  disabled={isLoading}
+                >
                   Save goals
                 </Button>
               </CardContent>
