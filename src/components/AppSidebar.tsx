@@ -16,33 +16,40 @@ import {
 import { useUserMeta } from "@/hooks/useUserMeta";
 
 const navItems = [
-  { 
-    title: "Dashboard", 
-    url: "/", 
+  {
+    title: "Dashboard",
+    url: "/",
     icon: LayoutDashboard,
     gradient: "from-blue-500 to-cyan-500",
-    color: "text-blue-600 dark:text-blue-400"
+    color: "text-blue-600 dark:text-blue-400",
   },
-  { 
-    title: "Add Case", 
-    url: "/add-case", 
+  {
+    title: "Add Case",
+    url: "/add-case",
     icon: Plus,
     gradient: "from-pink-500 to-rose-500",
-    color: "text-pink-600 dark:text-pink-400"
+    color: "text-pink-600 dark:text-pink-400",
   },
-  { 
-    title: "Analytics", 
-    url: "/analytics", 
+  {
+    title: "Analytics",
+    url: "/analytics",
     icon: TrendingUp,
     gradient: "from-green-500 to-emerald-500",
-    color: "text-green-600 dark:text-green-400"
+    color: "text-green-600 dark:text-green-400",
   },
-  { 
-    title: "Case History", 
-    url: "/history", 
+  {
+    title: "Case History",
+    url: "/history",
     icon: List,
     gradient: "from-purple-500 to-violet-500",
-    color: "text-purple-600 dark:text-purple-400"
+    color: "text-purple-600 dark:text-purple-400",
+  },
+  {
+    title: "My Account",
+    url: "/account",
+    icon: UserCircle2,
+    gradient: "from-slate-500 to-slate-700",
+    color: "text-muted-foreground",
   },
   {
     title: "Batches",
