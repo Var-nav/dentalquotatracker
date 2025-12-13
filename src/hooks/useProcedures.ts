@@ -46,9 +46,48 @@ export const useProcedures = () => {
     },
   });
 
+  const updateProcedure = useMutation({
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Omit<Procedure, "id" | "created_at">>;
+    }) => {
+      const { data, error } = await supabase
+        .from("procedures")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Procedure;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["procedures"] });
+    },
+  });
+
+  const deleteProcedure = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("procedures")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["procedures"] });
+    },
+  });
+
   return {
     procedures,
     isLoading,
     addProcedure: addProcedure.mutateAsync,
+    updateProcedure: updateProcedure.mutateAsync,
+    deleteProcedure: deleteProcedure.mutateAsync,
   };
 };

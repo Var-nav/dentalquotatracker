@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/select";
 import { ProgressCharts } from "@/components/ProgressCharts";
 import { ProcedureCalendar } from "@/components/ProcedureCalendar";
+import { EditProcedureDialog } from "@/components/EditProcedureDialog";
 import { useToast } from "@/hooks/use-toast";
-import { useProcedures, ProcedureType } from "@/hooks/useProcedures";
+import { useProcedures, ProcedureType, Procedure } from "@/hooks/useProcedures";
 import { useQuotaTargets } from "@/hooks/useQuotaTargets";
+import { Pencil, Trash2 } from "lucide-react";
 
 const PROCEDURE_TYPES: ProcedureType[] = ["Restorations", "Extractions", "Root Canals"];
 
@@ -30,7 +32,7 @@ const INITIAL_TARGETS: Record<ProcedureType, number> = {
 const Index = () => {
   const { toast } = useToast();
 
-  const { procedures, isLoading: proceduresLoading, addProcedure } = useProcedures();
+  const { procedures, isLoading: proceduresLoading, addProcedure, updateProcedure, deleteProcedure } = useProcedures();
   const { targets, isLoading: targetsLoading, updateTarget } = useQuotaTargets();
 
   const [patientName, setPatientName] = useState("");
@@ -39,6 +41,8 @@ const Index = () => {
   const [supervisorName, setSupervisorName] = useState("");
 
   const [editingTargets, setEditingTargets] = useState<Record<ProcedureType, number>>(INITIAL_TARGETS);
+  const [editingProcedure, setEditingProcedure] = useState<Procedure | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   // Sync editingTargets with backend targets on load
   useMemo(() => {
@@ -142,6 +146,47 @@ const Index = () => {
       toast({
         title: "Error updating goals",
         description: "Could not save goals. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditProcedure = (procedure: Procedure) => {
+    setEditingProcedure(procedure);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async (
+    id: string,
+    updates: Partial<Omit<Procedure, "id" | "created_at">>
+  ) => {
+    try {
+      await updateProcedure({ id, updates });
+      toast({
+        title: "Case updated",
+        description: "Procedure has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error updating case",
+        description: "Could not update the case. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const handleDeleteProcedure = async (id: string, patientName: string) => {
+    try {
+      await deleteProcedure(id);
+      toast({
+        title: "Case deleted",
+        description: `Procedure for ${patientName} has been removed.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting case",
+        description: "Could not delete the case. Please try again.",
         variant: "destructive",
       });
     }
@@ -256,19 +301,41 @@ const Index = () => {
                     {procedures.map((entry) => (
                       <div
                         key={entry.id}
-                        className="flex flex-col gap-1 rounded-md border border-border/60 bg-background/80 p-3 text-xs sm:flex-row sm:items-center sm:justify-between sm:text-sm"
+                        className="group flex items-center gap-2 rounded-md border border-border/60 bg-background/80 p-3 text-xs transition-colors hover:bg-background sm:text-sm"
                       >
-                        <div>
-                          <div className="font-medium text-foreground">{entry.patient_name}</div>
-                          <div className="mt-0.5 text-[0.7rem] uppercase tracking-[0.16em] text-muted-foreground">
-                            {entry.procedure_type}
+                        <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <div className="font-medium text-foreground">{entry.patient_name}</div>
+                            <div className="mt-0.5 text-[0.7rem] uppercase tracking-[0.16em] text-muted-foreground">
+                              {entry.procedure_type}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.7rem] text-muted-foreground sm:text-xs">
+                            <span>
+                              {format(new Date(entry.procedure_date), "MMM d, yyyy")} ·{" "}
+                              {entry.supervisor_name}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.7rem] text-muted-foreground sm:text-xs">
-                          <span>
-                            {format(new Date(entry.procedure_date), "MMM d, yyyy")} ·{" "}
-                            {entry.supervisor_name}
-                          </span>
+                        <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => handleEditProcedure(entry)}
+                            title="Edit case"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => handleDeleteProcedure(entry.id, entry.patient_name)}
+                            title="Delete case"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -389,6 +456,13 @@ const Index = () => {
 
           <ProcedureCalendar procedures={procedures} />
         </main>
+
+        <EditProcedureDialog
+          procedure={editingProcedure}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSave={handleSaveEdit}
+        />
 
         <footer className="mt-6 flex items-center justify-between gap-4 border-t pt-3 text-[0.7rem] text-muted-foreground sm:text-xs">
           <p>Designed for dental students tracking real clinical progress.</p>
