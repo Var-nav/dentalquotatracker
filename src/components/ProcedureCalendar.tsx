@@ -16,9 +16,9 @@ interface ProcedureCalendarProps {
 }
 
 const PROCEDURE_COLORS: Record<ProcedureType, string> = {
-  Restorations: "bg-primary",
-  Extractions: "bg-[hsl(var(--accent))]",
-  "Root Canals": "bg-[hsl(var(--accent-strong))]",
+  Restorations: "bg-green",
+  Extractions: "bg-orange",
+  "Root Canals": "bg-purple",
 };
 
 export const ProcedureCalendar = ({ procedures }: ProcedureCalendarProps) => {
@@ -121,15 +121,15 @@ export const ProcedureCalendar = ({ procedures }: ProcedureCalendarProps) => {
 
             <div className="flex flex-wrap gap-3 rounded-md border border-border/60 bg-background/60 p-3 text-xs">
               <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-primary" />
+                <div className="h-2 w-2 rounded-full bg-green" />
                 <span className="text-muted-foreground">Restorations</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-[hsl(var(--accent))]" />
+                <div className="h-2 w-2 rounded-full bg-orange" />
                 <span className="text-muted-foreground">Extractions</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-[hsl(var(--accent-strong))]" />
+                <div className="h-2 w-2 rounded-full bg-purple" />
                 <span className="text-muted-foreground">Root Canals</span>
               </div>
             </div>

@@ -41,6 +41,40 @@
 
     --radius: 0.75rem;
 
+    /* Extended color palette */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    
+    --error: 0 84% 60%;
+    --error-foreground: 0 0% 100%;
+    
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    
+    --purple: 262 83% 58%;
+    --purple-foreground: 0 0% 100%;
+    
+    --orange: 24 95% 53%;
+    --orange-foreground: 0 0% 100%;
+    
+    --green: 142 71% 45%;
+    --green-foreground: 0 0% 100%;
+    
+    --yellow: 45 93% 47%;
+    --yellow-foreground: 0 0% 100%;
+    
+    --red: 0 72% 51%;
+    --red-foreground: 0 0% 100%;
+    
+    --teal: 173 80% 40%;
+    --teal-foreground: 0 0% 100%;
+    
+    --pink: 330 81% 60%;
+    --pink-foreground: 0 0% 100%;
+
     /* Sidebar (if used) */
     --sidebar-background: 210 32% 98%;
     --sidebar-foreground: 222 47% 18%;
@@ -88,6 +122,40 @@
     --border: 217.2 32.6% 22%;
     --input: 217.2 32.6% 22%;
     --ring: 207 90% 56%;
+
+    /* Extended color palette - dark mode */
+    --success: 142 76% 42%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 0%;
+    
+    --error: 0 84% 65%;
+    --error-foreground: 0 0% 100%;
+    
+    --info: 199 89% 54%;
+    --info-foreground: 0 0% 100%;
+    
+    --purple: 262 83% 64%;
+    --purple-foreground: 0 0% 100%;
+    
+    --orange: 24 95% 58%;
+    --orange-foreground: 0 0% 100%;
+    
+    --green: 142 71% 50%;
+    --green-foreground: 0 0% 100%;
+    
+    --yellow: 45 93% 52%;
+    --yellow-foreground: 0 0% 0%;
+    
+    --red: 0 72% 56%;
+    --red-foreground: 0 0% 100%;
+    
+    --teal: 173 80% 45%;
+    --teal-foreground: 0 0% 100%;
+    
+    --pink: 330 81% 65%;
+    --pink-foreground: 0 0% 100%;
 
     --sidebar-background: 222.2 84% 5%;
     --sidebar-foreground: 210 40% 98%;
