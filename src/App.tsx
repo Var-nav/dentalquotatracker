@@ -11,6 +11,8 @@ import AddCase from "./pages/AddCase";
 import Analytics from "./pages/Analytics";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
+import AuthPage from "./pages/Auth";
+import OnboardingPage from "./pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ const App = () => (
               <main className="flex-1 p-6 overflow-auto">
                 <div className="max-w-7xl mx-auto">
                   <Routes>
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/onboarding" element={<OnboardingPage />} />
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/add-case" element={<AddCase />} />
                     <Route path="/analytics" element={<Analytics />} />
