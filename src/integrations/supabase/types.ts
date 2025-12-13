@@ -16,25 +16,34 @@ export type Database = {
     Tables: {
       batches: {
         Row: {
+          academic_year: string | null
           code: string | null
           created_at: string
           id: string
+          intake_label: string | null
           max_members: number | null
           name: string
+          year_of_study: string | null
         }
         Insert: {
+          academic_year?: string | null
           code?: string | null
           created_at?: string
           id?: string
+          intake_label?: string | null
           max_members?: number | null
           name: string
+          year_of_study?: string | null
         }
         Update: {
+          academic_year?: string | null
           code?: string | null
           created_at?: string
           id?: string
+          intake_label?: string | null
           max_members?: number | null
           name?: string
+          year_of_study?: string | null
         }
         Relationships: []
       }

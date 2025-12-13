@@ -181,10 +181,13 @@ function UserContextSection() {
       <div className="space-y-0.5">
         <p className="font-semibold text-foreground truncate">
           {roleLabel || "Role not set"}
+          {meta.yearOfStudy && ` · ${meta.yearOfStudy}`}
           {meta.batchName && ` · ${meta.batchName}`}
         </p>
         <p className="text-[11px] text-muted-foreground truncate">
-          Viewing progress for your batch
+          {(meta.intakeLabel || meta.academicYear)
+            ? `Viewing ${[meta.intakeLabel, meta.academicYear].filter(Boolean).join(" ")}`
+            : "Viewing progress for your batch"}
         </p>
       </div>
     </div>
