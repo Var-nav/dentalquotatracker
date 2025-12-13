@@ -14,32 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
-      procedures: {
+      departments: {
         Row: {
           created_at: string
           id: string
-          patient_name: string
-          procedure_date: string
-          procedure_type: string
-          supervisor_name: string
+          name: string
         }
         Insert: {
           created_at?: string
           id?: string
-          patient_name: string
-          procedure_date: string
-          procedure_type: string
-          supervisor_name: string
+          name: string
         }
         Update: {
           created_at?: string
           id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      procedures: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          id: string
+          patient_name: string
+          procedure_date: string
+          procedure_type: string
+          quota_task_id: string | null
+          supervisor_name: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          patient_name: string
+          procedure_date: string
+          procedure_type: string
+          quota_task_id?: string | null
+          supervisor_name: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          id?: string
           patient_name?: string
           procedure_date?: string
           procedure_type?: string
+          quota_task_id?: string | null
           supervisor_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "procedures_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_quota_task_id_fkey"
+            columns: ["quota_task_id"]
+            isOneToOne: false
+            referencedRelation: "quota_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quota_targets: {
         Row: {
@@ -61,6 +100,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      quota_tasks: {
+        Row: {
+          created_at: string
+          department_id: string
+          id: string
+          is_predefined: boolean
+          target: number
+          task_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department_id: string
+          id?: string
+          is_predefined?: boolean
+          target?: number
+          task_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string
+          id?: string
+          is_predefined?: boolean
+          target?: number
+          task_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quota_tasks_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

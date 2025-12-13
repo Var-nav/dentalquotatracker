@@ -10,6 +10,8 @@ export interface Procedure {
   procedure_date: string;
   supervisor_name: string;
   created_at?: string;
+  department_id?: string | null;
+  quota_task_id?: string | null;
 }
 
 export const useProcedures = () => {

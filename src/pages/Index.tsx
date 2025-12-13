@@ -1,198 +1,15 @@
-import { useMemo, useState } from "react";
-import { format } from "date-fns";
-
-import { Button } from "@/components/ui/button";
+import { Accordion } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ProgressCharts } from "@/components/ProgressCharts";
-import { ProcedureCalendar } from "@/components/ProcedureCalendar";
-import { EditProcedureDialog } from "@/components/EditProcedureDialog";
-import { useToast } from "@/hooks/use-toast";
-import { useProcedures, ProcedureType, Procedure } from "@/hooks/useProcedures";
-import { useQuotaTargets } from "@/hooks/useQuotaTargets";
-import { Pencil, Trash2 } from "lucide-react";
-
-const PROCEDURE_TYPES: ProcedureType[] = ["Restorations", "Extractions", "Root Canals"];
-
-const INITIAL_TARGETS: Record<ProcedureType, number> = {
-  Restorations: 40,
-  Extractions: 50,
-  "Root Canals": 25,
-};
+import { useDepartments } from "@/hooks/useDepartments";
+import { useQuotaTasks } from "@/hooks/useQuotaTasks";
+import { DepartmentAccordion } from "@/components/DepartmentAccordion";
+import { Target } from "lucide-react";
 
 const Index = () => {
-  const { toast } = useToast();
+  const { data: departments = [], isLoading: departmentsLoading } = useDepartments();
+  const { data: allTasks = [], isLoading: tasksLoading } = useQuotaTasks();
 
-  const { procedures, isLoading: proceduresLoading, addProcedure, updateProcedure, deleteProcedure } = useProcedures();
-  const { targets, isLoading: targetsLoading, updateTarget } = useQuotaTargets();
-
-  const [patientName, setPatientName] = useState("");
-  const [procedureType, setProcedureType] = useState<ProcedureType | "">("");
-  const [date, setDate] = useState<string>("");
-  const [supervisorName, setSupervisorName] = useState("");
-
-  const [editingTargets, setEditingTargets] = useState<Record<ProcedureType, number>>(INITIAL_TARGETS);
-  const [editingProcedure, setEditingProcedure] = useState<Procedure | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-
-  // Sync editingTargets with backend targets on load
-  useMemo(() => {
-    if (targets.length > 0) {
-      const backendTargets = targets.reduce(
-        (acc, t) => ({ ...acc, [t.procedure_type]: t.target }),
-        {} as Record<ProcedureType, number>
-      );
-      setEditingTargets((prev) => ({ ...prev, ...backendTargets }));
-    }
-  }, [targets]);
-
-  const stats = useMemo(() => {
-    const counts: Record<ProcedureType, number> = {
-      Restorations: 0,
-      Extractions: 0,
-      "Root Canals": 0,
-    };
-
-    for (const entry of procedures) {
-      counts[entry.procedure_type as ProcedureType]++;
-    }
-
-    return counts;
-  }, [procedures]);
-
-  const targetsMap = useMemo(() => {
-    return targets.reduce(
-      (acc, t) => ({ ...acc, [t.procedure_type]: t.target }),
-      INITIAL_TARGETS
-    );
-  }, [targets]);
-
-  const handleAddEntry = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!patientName.trim() || !procedureType || !date || !supervisorName.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please complete all fields before adding a case.",
-      });
-      return;
-    }
-
-    try {
-      await addProcedure({
-        patient_name: patientName.trim(),
-        procedure_type: procedureType as ProcedureType,
-        procedure_date: date,
-        supervisor_name: supervisorName.trim(),
-      });
-
-      setPatientName("");
-      setProcedureType("");
-      setDate("");
-      setSupervisorName("");
-
-      toast({
-        title: "Case added",
-        description: `${procedureType} for ${patientName.trim()} recorded.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error adding case",
-        description: "Could not save the case. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleTargetChange = (type: ProcedureType, value: string) => {
-    const numeric = Number(value.replace(/[^0-9]/g, ""));
-    if (Number.isNaN(numeric)) return;
-
-    setEditingTargets((prev) => ({
-      ...prev,
-      [type]: numeric,
-    }));
-  };
-
-  const handleSaveTargets = async () => {
-    try {
-      const sanitized: Record<ProcedureType, number> = { ...editingTargets };
-      (Object.keys(sanitized) as ProcedureType[]).forEach((key) => {
-        if (!sanitized[key] || sanitized[key] < 1) {
-          sanitized[key] = 1;
-        }
-      });
-
-      await Promise.all(
-        (Object.keys(sanitized) as ProcedureType[]).map((type) =>
-          updateTarget({ procedure_type: type, target: sanitized[type] })
-        )
-      );
-
-      toast({
-        title: "Goals updated",
-        description: "Clinical quota targets have been updated.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error updating goals",
-        description: "Could not save goals. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleEditProcedure = (procedure: Procedure) => {
-    setEditingProcedure(procedure);
-    setEditDialogOpen(true);
-  };
-
-  const handleSaveEdit = async (
-    id: string,
-    updates: Partial<Omit<Procedure, "id" | "created_at">>
-  ) => {
-    try {
-      await updateProcedure({ id, updates });
-      toast({
-        title: "Case updated",
-        description: "Procedure has been updated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error updating case",
-        description: "Could not update the case. Please try again.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const handleDeleteProcedure = async (id: string, patientName: string) => {
-    try {
-      await deleteProcedure(id);
-      toast({
-        title: "Case deleted",
-        description: `Procedure for ${patientName} has been removed.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error deleting case",
-        description: "Could not delete the case. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const isLoading = proceduresLoading || targetsLoading;
+  const isLoading = departmentsLoading || tasksLoading;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple/5 via-background to-teal/5 text-foreground">
@@ -204,7 +21,7 @@ const Index = () => {
             "@type": "EducationalOccupationalProgram",
             name: "Dental Clinical Quota Dashboard",
             description:
-              "Dashboard for dental students to track clinical quotas for restorations, extractions, and root canals.",
+              "Dashboard for dental students to track clinical quotas across all departments.",
             educationalCredentialAwarded: "DDS Clinical Requirements",
             provider: {
               "@type": "CollegeOrUniversity",
@@ -214,8 +31,8 @@ const Index = () => {
         }}
       />
 
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8 animate-fade-in">
-        <header className="mb-6 flex items-center justify-between gap-4">
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8 animate-fade-in">
+        <header className="mb-8 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Clinical tracker
@@ -223,9 +40,8 @@ const Index = () => {
             <h1 className="bg-clip-text text-2xl font-semibold tracking-tight text-transparent sm:text-3xl md:text-4xl lg:text-5xl bg-gradient-to-r from-purple via-primary to-teal">
               Dental Clinical Quota Dashboard
             </h1>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
-              Log every patient, watch your requirements fill in real time, and stay ahead of
-              graduation deadlines.
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+              Track your clinical requirements across all departments. Manage quota tasks, set targets, and monitor your progress toward graduation.
             </p>
           </div>
           <div className="hidden shrink-0 items-center rounded-full border border-success/20 bg-success/10 px-4 py-2 text-xs shadow-soft transition-all duration-300 hover:scale-105 hover:shadow-lg md:flex">
@@ -234,263 +50,88 @@ const Index = () => {
           </div>
         </header>
 
-        <main className="flex flex-1 flex-col gap-4">
-          <div className="grid gap-4 md:grid-cols-[minmax(0,_3fr)_minmax(280px,_2fr)] lg:grid-cols-[minmax(0,_3.2fr)_minmax(320px,_2fr)]">
-          <section className="space-y-4">
-            <Card className="relative overflow-hidden border border-purple/20 bg-gradient-to-br from-card via-purple/5 to-card shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-purple opacity-20 blur-3xl" />
-              <CardHeader className="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <CardTitle className="text-base sm:text-lg">Quota overview</CardTitle>
-                <p className="text-xs text-muted-foreground sm:text-sm">
-                  Tap a bar to see counts and adjust goals on the right.
+        <main className="flex flex-1 flex-col gap-6">
+          <Card className="border border-primary/20 bg-gradient-to-br from-card via-primary/5 to-card shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-xl animate-fade-in">
+            <CardHeader className="flex flex-row items-center gap-3 pb-4">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                <Target className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-lg sm:text-xl">Department Quotas</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Expand each department to view quota tasks, track progress, and add custom tasks
                 </p>
-              </CardHeader>
-              <CardContent className="relative z-10 space-y-4">
-                {isLoading ? (
-                  <div className="text-center text-sm text-muted-foreground">Loading...</div>
-                ) : (
-                  PROCEDURE_TYPES.map((type) => {
-                    const count = stats[type];
-                    const target = targetsMap[type] || 1;
-                    const percent = Math.min(100, Math.round((count / target) * 100));
-                    
-                    // Assign colors based on procedure type
-                    const colorMap: Record<ProcedureType, string> = {
-                      Restorations: "green",
-                      Extractions: "orange",
-                      "Root Canals": "purple",
-                    };
-                    const color = colorMap[type];
-
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        className={`group flex w-full flex-col gap-1 rounded-lg border border-${color}/30 bg-${color}/5 p-3 text-left transition-all duration-300
-                                   hover:-translate-y-[2px] hover:bg-${color}/10 hover:shadow-lg hover:shadow-${color}/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-${color}`}
-                      >
-                        <div className="flex items-center justify-between text-xs font-medium sm:text-sm">
-                          <span>{type}</span>
-                          <span className="text-muted-foreground">
-                            {count} / {target} cases
-                          </span>
-                        </div>
-                        <div className="mt-1 flex items-center gap-3">
-                          <Progress
-                            value={percent}
-                            className={`h-2 flex-1 overflow-hidden rounded-full bg-${color}/20 [&>div]:bg-${color} [&>div]:transition-all [&>div]:duration-500`}
-                          />
-                          <span className="w-10 text-right text-xs tabular-nums text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
-                            {percent}%
-                          </span>
-                        </div>
-                      </button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <div className="animate-pulse">Loading departments...</div>
+                </div>
+              ) : departments.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  No departments found. Please contact support.
+                </div>
+              ) : (
+                <Accordion type="multiple" className="space-y-0">
+                  {departments.map((department, index) => {
+                    const departmentTasks = allTasks.filter(
+                      (task) => task.department_id === department.id
                     );
-                  })
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="relative overflow-hidden border border-teal/20 bg-gradient-to-br from-card via-teal/5 to-card shadow-soft transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>/
-              <div className="pointer-events-none absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-teal opacity-20 blur-3xl" />
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-base sm:text-lg">Case history</CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10 space-y-2">
-                {isLoading ? (
-                  <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-4 text-center text-xs text-muted-foreground sm:text-sm">
-                    Loading your cases...
-                  </div>
-                ) : procedures.length === 0 ? (
-                  <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-4 text-center text-xs text-muted-foreground sm:text-sm">
-                    Your recent procedures will appear here. Start by adding a case on the right.
-                  </div>
-                ) : (
-                  <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
-                    {procedures.map((entry) => {
-                      const colorMap: Record<ProcedureType, string> = {
-                        Restorations: "green",
-                        Extractions: "orange",
-                        "Root Canals": "purple",
-                      };
-                      const entryColor = colorMap[entry.procedure_type as ProcedureType];
-                      
-                      return (
-                      <div
-                        key={entry.id}
-                        className={`group flex items-center gap-2 rounded-md border border-${entryColor}/30 bg-${entryColor}/5 p-3 text-xs transition-all duration-300 hover:bg-${entryColor}/10 hover:-translate-y-0.5 hover:shadow-md animate-fade-in sm:text-sm`}
-                        style={{ animationDelay: `${procedures.indexOf(entry) * 0.05}s` }}
+                    
+                    return (
+                      <div 
+                        key={department.id}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <div className="font-medium text-foreground">{entry.patient_name}</div>
-                            <div className="mt-0.5 text-[0.7rem] uppercase tracking-[0.16em] text-muted-foreground">
-                              {entry.procedure_type}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.7rem] text-muted-foreground sm:text-xs">
-                            <span>
-                              {format(new Date(entry.procedure_date), "MMM d, yyyy")} ·{" "}
-                              {entry.supervisor_name}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 gap-1 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 transition-all duration-200 hover:scale-110 active:scale-95"
-                            onClick={() => handleEditProcedure(entry)}
-                            title="Edit case"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-destructive transition-all duration-200 hover:scale-110 hover:bg-destructive/10 hover:text-destructive active:scale-95"
-                            onClick={() => handleDeleteProcedure(entry.id, entry.patient_name)}
-                            title="Delete case"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                        <DepartmentAccordion
+                          department={department}
+                          tasks={departmentTasks}
+                        />
                       </div>
                     );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </section>
+                  })}
+                </Accordion>
+              )}
+            </CardContent>
+          </Card>
 
-          <section className="space-y-4">
-            <Card className="border border-pink/20 bg-gradient-to-br from-card via-pink/5 to-card shadow-soft transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-pink opacity-20 blur-3xl" />
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-base sm:text-lg">Add patient case</CardTitle>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Card className="border border-info/20 bg-gradient-to-br from-card via-info/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <CardHeader>
+                <CardTitle className="text-base">Total Departments</CardTitle>
               </CardHeader>
-              <CardContent className="relative z-10">
-                <form onSubmit={handleAddEntry} className="space-y-3">
-                  <div className="space-y-1.5 animate-fade-in" style={{ animationDelay: "0.05s" }}>
-                    <Label htmlFor="patientName">Patient name</Label>
-                    <Input
-                      id="patientName"
-                      value={patientName}
-                      onChange={(e) => setPatientName(e.target.value)}
-                      placeholder="e.g. J. Smith"
-                      autoComplete="off"
-                      className="transition-all duration-200 focus:scale-[1.02]"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-                    <Label>Procedure type</Label>
-                    <Select
-                      value={procedureType || ""}
-                      onValueChange={(value) => setProcedureType(value as ProcedureType)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select procedure" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PROCEDURE_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5 animate-fade-in" style={{ animationDelay: "0.15s" }}>
-                    <Label htmlFor="date">Date</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="transition-all duration-200 focus:scale-[1.02]"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                    <Label htmlFor="supervisorName">Supervisor</Label>
-                    <Input
-                      id="supervisorName"
-                      value={supervisorName}
-                      onChange={(e) => setSupervisorName(e.target.value)}
-                      placeholder="e.g. Dr. Patel"
-                      autoComplete="off"
-                    />
-                  </div>
-
-                  <Button type="submit" className="mt-1 w-full bg-gradient-to-r from-pink to-purple hover:from-pink/90 hover:to-purple/90 transition-all duration-300 hover:scale-[1.02] active:scale-95" disabled={isLoading}>
-                    Log case
-                  </Button>
-                </form>
+              <CardContent>
+                <div className="text-4xl font-bold text-info">{departments.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">Active clinical departments</p>
               </CardContent>
             </Card>
 
-            <Card className="border border-orange/20 bg-gradient-to-br from-card via-orange/5 to-card shadow-soft">
-              <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-orange opacity-20 blur-3xl" />
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-base sm:text-lg">Quota goals</CardTitle>
+            <Card className="border border-success/20 bg-gradient-to-br from-card via-success/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+              <CardHeader>
+                <CardTitle className="text-base">Total Quota Tasks</CardTitle>
               </CardHeader>
-              <CardContent className="relative z-10 space-y-3">
-                <p className="text-xs text-muted-foreground sm:text-sm">
-                  Adjust your target number of cases for each category to match your school or
-                  clinic requirements.
+              <CardContent>
+                <div className="text-4xl font-bold text-success">{allTasks.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {allTasks.filter(t => t.is_predefined).length} predefined, {allTasks.filter(t => !t.is_predefined).length} custom
                 </p>
-
-                <div className="space-y-2">
-                  {PROCEDURE_TYPES.map((type) => (
-                    <div key={type} className="flex items-center gap-3">
-                      <Label className="min-w-[6.5rem] text-xs sm:min-w-[7rem] sm:text-sm">
-                        {type}
-                      </Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        inputMode="numeric"
-                        value={editingTargets[type]?.toString() || ""}
-                        onChange={(e) => handleTargetChange(type, e.target.value)}
-                        className="h-8 flex-1 text-xs sm:h-9 sm:text-sm"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full bg-gradient-to-r from-orange to-yellow hover:from-orange/90 hover:to-yellow/90 transition-all duration-300 hover:scale-[1.02] active:scale-95"
-                  onClick={handleSaveTargets}
-                  disabled={isLoading}
-                >
-                  Save goals
-                </Button>
               </CardContent>
             </Card>
-          </section>
+
+            <Card className="border border-warning/20 bg-gradient-to-br from-card via-warning/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up sm:col-span-2 lg:col-span-1" style={{ animationDelay: "0.3s" }}>
+              <CardHeader>
+                <CardTitle className="text-base">Quick Tips</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-2">
+                <p>• Click "Add Custom Task" to create new quota tasks</p>
+                <p>• Edit targets by clicking the edit icon</p>
+                <p>• Delete custom tasks with the trash icon</p>
+              </CardContent>
+            </Card>
           </div>
-
-          <ProgressCharts procedures={procedures} targets={targetsMap} />
-
-          <ProcedureCalendar procedures={procedures} />
         </main>
-
-        <EditProcedureDialog
-          procedure={editingProcedure}
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-          onSave={handleSaveEdit}
-        />
-
-        <footer className="mt-6 flex items-center justify-between gap-4 border-t pt-3 text-[0.7rem] text-muted-foreground sm:text-xs">
-          <p>Designed for dental students tracking real clinical progress.</p>
-          <p className="hidden sm:block">Tip: Rotate your phone for a wider dashboard view.</p>
-        </footer>
       </div>
     </div>
   );
