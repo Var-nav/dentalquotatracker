@@ -67,7 +67,7 @@ export const ProcedureCalendar = ({ procedures }: ProcedureCalendarProps) => {
 
   return (
     <>
-      <Card className="relative overflow-hidden border border-yellow/20 bg-gradient-to-br from-card via-yellow/5 to-card shadow-soft backdrop-blur-sm">
+      <Card className="relative overflow-hidden border border-yellow/20 bg-gradient-to-br from-card via-yellow/5 to-card shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
         <div className="pointer-events-none absolute -top-10 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full bg-yellow opacity-20 blur-3xl" />
         <CardHeader className="relative z-10">
           <CardTitle className="text-base sm:text-lg">Procedure calendar</CardTitle>
@@ -81,7 +81,7 @@ export const ProcedureCalendar = ({ procedures }: ProcedureCalendarProps) => {
               mode="single"
               selected={selectedDate}
               onSelect={handleDayClick}
-              className="rounded-md border"
+              className="rounded-md border transition-all duration-300"
               modifiers={{
                 hasProcedures: (date) => {
                   const dateKey = format(date, "yyyy-MM-dd");
@@ -119,16 +119,16 @@ export const ProcedureCalendar = ({ procedures }: ProcedureCalendarProps) => {
               }}
             />
 
-            <div className="flex flex-wrap gap-3 rounded-md border border-border/60 bg-background/60 p-3 text-xs">
-              <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap gap-3 rounded-md border border-border/60 bg-background/60 p-3 text-xs animate-fade-in" style={{ animationDelay: "0.3s" }}>
+              <div className="flex items-center gap-1.5 transition-transform duration-200 hover:scale-105">
                 <div className="h-2 w-2 rounded-full bg-green" />
                 <span className="text-muted-foreground">Restorations</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 transition-transform duration-200 hover:scale-105">
                 <div className="h-2 w-2 rounded-full bg-orange" />
                 <span className="text-muted-foreground">Extractions</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 transition-transform duration-200 hover:scale-105">
                 <div className="h-2 w-2 rounded-full bg-purple" />
                 <span className="text-muted-foreground">Root Canals</span>
               </div>
@@ -138,7 +138,7 @@ export const ProcedureCalendar = ({ procedures }: ProcedureCalendarProps) => {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md animate-scale-in">
           <DialogHeader>
             <DialogTitle>
               Cases on {selectedDate && format(selectedDate, "MMMM d, yyyy")}
@@ -148,10 +148,11 @@ export const ProcedureCalendar = ({ procedures }: ProcedureCalendarProps) => {
             {selectedDateProcedures.length === 0 ? (
               <p className="text-sm text-muted-foreground">No procedures logged for this day.</p>
             ) : (
-              selectedDateProcedures.map((proc) => (
+              selectedDateProcedures.map((proc, idx) => (
                 <div
                   key={proc.id}
-                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/80 p-3"
+                  className={`flex items-start gap-3 rounded-lg border border-border/60 bg-background/80 p-3 transition-all duration-300 hover:bg-background hover:-translate-y-0.5 hover:shadow-md animate-fade-in`}
+                  style={{ animationDelay: `${idx * 0.05}s` }}
                 >
                   <div
                     className={cn(
