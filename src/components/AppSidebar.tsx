@@ -1,4 +1,4 @@
-import { LayoutDashboard, Plus, TrendingUp, List, Target } from "lucide-react";
+import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 
@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useUserMeta } from "@/hooks/useUserMeta";
 
 const navItems = [
   { 
@@ -129,25 +130,63 @@ export function AppSidebar() {
 
         {open && (
           <div className="mt-auto p-4 border-t border-border/50 bg-gradient-to-br from-primary/5 to-secondary/5 animate-fade-in">
-            <div className="text-xs space-y-2">
-              <div className="flex items-center gap-2 px-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                <p className="font-semibold text-foreground">Quick Stats</p>
-              </div>
-              <div className="px-2 space-y-1 text-muted-foreground">
-                <p className="flex items-center gap-2">
-                  <span className="h-1 w-1 rounded-full bg-muted-foreground" />
-                  8 Departments
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="h-1 w-1 rounded-full bg-muted-foreground" />
-                  Track progress
-                </p>
-              </div>
-            </div>
+            <UserContextSection />
           </div>
         )}
       </SidebarContent>
     </Sidebar>
+  );
+}
+
+function UserContextSection() {
+  const { meta, loading } = useUserMeta();
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-3 text-xs text-muted-foreground px-2">
+        <div className="h-6 w-6 rounded-full bg-muted animate-pulse" />
+        <div className="space-y-1 flex-1">
+          <div className="h-2 w-20 rounded bg-muted animate-pulse" />
+          <div className="h-2 w-16 rounded bg-muted animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!meta.role && !meta.batchName) {
+    return (
+      <div className="text-xs text-muted-foreground px-2 space-y-1">
+        <p className="font-semibold flex items-center gap-2">
+          <UserCircle2 className="h-4 w-4 text-muted-foreground" />
+          Not set up yet
+        </p>
+        <p className="text-[11px]">
+          Finish onboarding to link your role and batch.
+        </p>
+      </div>
+    );
+  }
+
+  const roleLabel = meta.role
+    ? meta.role === "student"
+      ? "Student"
+      : "Instructor"
+    : "";
+
+  return (
+    <div className="flex items-center gap-3 text-xs px-2">
+      <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground shadow-md">
+        <UserCircle2 className="h-4 w-4" />
+      </div>
+      <div className="space-y-0.5">
+        <p className="font-semibold text-foreground truncate">
+          {roleLabel || "Role not set"}
+          {meta.batchName && ` · ${meta.batchName}`}
+        </p>
+        <p className="text-[11px] text-muted-foreground truncate">
+          Viewing progress for your batch
+        </p>
+      </div>
+    </div>
   );
 }

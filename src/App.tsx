@@ -13,6 +13,7 @@ import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import OnboardingPage from "./pages/Onboarding";
+import { AuthProvider } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
 
@@ -22,38 +23,43 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SidebarProvider>
-          <div className="min-h-screen flex w-full bg-gradient-to-br from-purple/5 via-background to-teal/5">
-            <AppSidebar />
-            <div className="flex-1 flex flex-col">
-              <header className="h-16 border-b border-border/50 bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md sticky top-0 z-40 flex items-center px-6 shadow-md">
-                <SidebarTrigger className="mr-6 h-10 w-10 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 hover:scale-110" />
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple via-primary to-teal flex items-center justify-center shadow-md">
-                    <Target className="h-4 w-4 text-white" />
+        <AuthProvider>
+          <SidebarProvider>
+            <div className="min-h-screen flex w-full bg-gradient-to-br from-purple/5 via-background to-teal/5">
+              <AppSidebar />
+              <div className="flex-1 flex flex-col">
+                <header className="h-16 border-b border-border/50 bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between px-6 shadow-md">
+                  <div className="flex items-center gap-3">
+                    <SidebarTrigger className="mr-3 h-10 w-10 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 hover:scale-110" />
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple via-primary to-teal flex items-center justify-center shadow-md">
+                        <Target className="h-4 w-4 text-white" />
+                      </div>
+                      <h1 className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
+                        Dental Clinical Quota Dashboard
+                      </h1>
+                    </div>
                   </div>
-                  <h1 className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
-                    Dental Clinical Quota Dashboard
-                  </h1>
-                </div>
-              </header>
-              <main className="flex-1 p-6 overflow-auto">
-                <div className="max-w-7xl mx-auto">
-                  <Routes>
-                    <Route path="/auth" element={<AuthPage />} />
-                    <Route path="/onboarding" element={<OnboardingPage />} />
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/add-case" element={<AddCase />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/history" element={<History />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
-              </main>
+                  {/* Role & batch indicator will be rendered by a small component to keep App lean */}
+                </header>
+                <main className="flex-1 p-6 overflow-auto">
+                  <div className="max-w-7xl mx-auto">
+                    <Routes>
+                      <Route path="/auth" element={<AuthPage />} />
+                      <Route path="/onboarding" element={<OnboardingPage />} />
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/add-case" element={<AddCase />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/history" element={<History />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </div>
+                </main>
+              </div>
             </div>
-          </div>
-        </SidebarProvider>
+          </SidebarProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
