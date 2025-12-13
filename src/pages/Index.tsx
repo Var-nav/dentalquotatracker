@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ProgressCharts } from "@/components/ProgressCharts";
 import { useToast } from "@/hooks/use-toast";
 import { useProcedures, ProcedureType } from "@/hooks/useProcedures";
 import { useQuotaTargets } from "@/hooks/useQuotaTargets";
@@ -187,7 +188,8 @@ const Index = () => {
           </div>
         </header>
 
-        <main className="grid flex-1 gap-4 md:grid-cols-[minmax(0,_3fr)_minmax(280px,_2fr)] lg:grid-cols-[minmax(0,_3.2fr)_minmax(320px,_2fr)]">
+        <main className="flex flex-1 flex-col gap-4">
+          <div className="grid gap-4 md:grid-cols-[minmax(0,_3fr)_minmax(280px,_2fr)] lg:grid-cols-[minmax(0,_3.2fr)_minmax(320px,_2fr)]">
           <section className="space-y-4">
             <Card className="relative overflow-hidden border border-primary/10 bg-card/80 shadow-soft backdrop-blur-sm">
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--primary-soft))] opacity-40 blur-3xl" />
@@ -380,6 +382,9 @@ const Index = () => {
               </CardContent>
             </Card>
           </section>
+          </div>
+
+          <ProgressCharts procedures={procedures} targets={targetsMap} />
         </main>
 
         <footer className="mt-6 flex items-center justify-between gap-4 border-t pt-3 text-[0.7rem] text-muted-foreground sm:text-xs">
