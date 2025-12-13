@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { Target } from "lucide-react";
 import Dashboard from "./pages/Dashboard";
 import AddCase from "./pages/AddCase";
 import Analytics from "./pages/Analytics";
@@ -23,10 +24,13 @@ const App = () => (
           <div className="min-h-screen flex w-full bg-gradient-to-br from-purple/5 via-background to-teal/5">
             <AppSidebar />
             <div className="flex-1 flex flex-col">
-              <header className="h-14 border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-40 flex items-center px-4 shadow-sm">
-                <SidebarTrigger className="mr-4" />
-                <div className="flex items-center gap-2">
-                  <h1 className="text-sm font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
+              <header className="h-16 border-b border-border/50 bg-gradient-to-r from-card/80 via-card/90 to-card/80 backdrop-blur-md sticky top-0 z-40 flex items-center px-6 shadow-md">
+                <SidebarTrigger className="mr-6 h-10 w-10 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 hover:scale-110" />
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple via-primary to-teal flex items-center justify-center shadow-md">
+                    <Target className="h-4 w-4 text-white" />
+                  </div>
+                  <h1 className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
                     Dental Clinical Quota Dashboard
                   </h1>
                 </div>
