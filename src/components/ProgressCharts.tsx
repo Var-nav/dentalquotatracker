@@ -135,8 +135,8 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
 
   return (
     <div className="space-y-4">
-      <Card className="relative overflow-hidden border border-primary/10 bg-card/80 shadow-soft backdrop-blur-sm">
-        <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--accent-strong))] opacity-30 blur-3xl" />
+      <Card className="relative overflow-hidden border border-info/20 bg-gradient-to-br from-card via-info/5 to-card shadow-soft backdrop-blur-sm">
+        <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-info opacity-20 blur-3xl" />
         <CardHeader className="relative z-10">
           <CardTitle className="text-base sm:text-lg">Weekly progress</CardTitle>
           <p className="text-xs text-muted-foreground sm:text-sm">
@@ -188,8 +188,8 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
         </CardContent>
       </Card>
 
-      <Card className="relative overflow-hidden border border-primary/10 bg-card/80 shadow-soft backdrop-blur-sm">
-        <div className="pointer-events-none absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-[hsl(var(--primary-soft))] opacity-30 blur-3xl" />
+      <Card className="relative overflow-hidden border border-success/20 bg-gradient-to-br from-card via-success/5 to-card shadow-soft backdrop-blur-sm">
+        <div className="pointer-events-none absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-success opacity-20 blur-3xl" />
         <CardHeader className="relative z-10">
           <CardTitle className="text-base sm:text-lg">Projected completion</CardTitle>
           <p className="text-xs text-muted-foreground sm:text-sm">
@@ -197,10 +197,18 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
           </p>
         </CardHeader>
         <CardContent className="relative z-10 space-y-3">
-          {projections.map((proj) => (
+          {projections.map((proj) => {
+            const colorMap: Record<ProcedureType, string> = {
+              Restorations: "green",
+              Extractions: "orange",
+              "Root Canals": "purple",
+            };
+            const projColor = colorMap[proj.type];
+            
+            return (
             <div
               key={proj.type}
-              className="flex flex-col gap-2 rounded-lg border border-border/60 bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+              className={`flex flex-col gap-2 rounded-lg border border-${projColor}/30 bg-${projColor}/5 p-3 sm:flex-row sm:items-center sm:justify-between`}
             >
               <div className="flex-1">
                 <div className="text-xs font-medium sm:text-sm">{proj.type}</div>
@@ -211,11 +219,11 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
               </div>
               <div className="flex items-center gap-2">
                 {proj.projectedDate === "Completed" ? (
-                  <span className="rounded-full bg-[hsl(var(--accent-strong))]/10 px-3 py-1 text-xs font-medium text-[hsl(var(--accent-strong))]">
+                  <span className="rounded-full bg-success/20 px-3 py-1 text-xs font-medium text-success">
                     ✓ Completed
                   </span>
                 ) : proj.projectedDate === "Needs more data" ? (
-                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                  <span className="rounded-full bg-warning/20 px-3 py-1 text-xs font-medium text-warning">
                     Needs data
                   </span>
                 ) : (
@@ -228,7 +236,8 @@ export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => 
                 )}
               </div>
             </div>
-          ))}
+          );
+          })}
         </CardContent>
       </Card>
     </div>
