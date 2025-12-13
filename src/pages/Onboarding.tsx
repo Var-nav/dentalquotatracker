@@ -19,6 +19,9 @@ import { useToast } from "@/hooks/use-toast";
 interface Batch {
   id: string;
   name: string;
+  year_of_study: string | null;
+  academic_year: string | null;
+  intake_label: string | null;
 }
 
 const onboardingSchema = z.object({
@@ -62,7 +65,9 @@ const OnboardingPage = () => {
 
         const { data: batchRows, error: batchError } = await supabase
           .from("batches")
-          .select("id, name")
+          .select("id, name, year_of_study, academic_year, intake_label")
+          .order("academic_year", { ascending: false })
+          .order("intake_label")
           .order("name");
 
         if (batchError) throw batchError;
@@ -178,11 +183,16 @@ const OnboardingPage = () => {
                 <SelectValue placeholder="Select your batch (e.g. H batch)" />
               </SelectTrigger>
               <SelectContent>
-                {batches.map((batch) => (
-                  <SelectItem key={batch.id} value={batch.id}>
-                    {batch.name}
-                  </SelectItem>
-                ))}
+                {batches.map((batch) => {
+                  const pieces = [batch.year_of_study, batch.name, batch.intake_label, batch.academic_year]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return (
+                    <SelectItem key={batch.id} value={batch.id}>
+                      {pieces}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

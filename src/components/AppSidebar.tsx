@@ -1,4 +1,4 @@
-import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2 } from "lucide-react";
+import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2, Layers3 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 
@@ -44,8 +44,14 @@ const navItems = [
     gradient: "from-purple-500 to-violet-500",
     color: "text-purple-600 dark:text-purple-400"
   },
+  {
+    title: "Batches",
+    url: "/batches",
+    icon: Layers3,
+    gradient: "from-amber-500 to-orange-500",
+    color: "text-amber-600 dark:text-amber-400",
+  },
 ];
-
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();

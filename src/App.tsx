@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import AddCase from "./pages/AddCase";
 import Analytics from "./pages/Analytics";
 import History from "./pages/History";
+import ManageBatchesPage from "./pages/ManageBatches";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import OnboardingPage from "./pages/Onboarding";
@@ -53,6 +54,7 @@ const App = () => (
                       <Route path="/add-case" element={<AddCase />} />
                       <Route path="/analytics" element={<Analytics />} />
                       <Route path="/history" element={<History />} />
+                      <Route path="/batches" element={<ManageBatchesPage />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
