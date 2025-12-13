@@ -37,7 +37,7 @@ const App = () => (
                         <Target className="h-4 w-4 text-white" />
                       </div>
                       <h1 className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
-                        Quota Tracker
+                        Quoto Tracker
                       </h1>
                     </div>
                   </div>
