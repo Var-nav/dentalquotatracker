@@ -26,7 +26,23 @@ export function UserMetaPill() {
       : "Instructor"
     : "Role not set";
 
-  const text = meta.batchName ? `${roleLabel} · ${meta.batchName}` : roleLabel;
+  const parts: string[] = [];
+  parts.push(roleLabel);
+
+  if (meta.yearOfStudy) {
+    parts.push(meta.yearOfStudy);
+  }
+
+  if (meta.batchName) {
+    parts.push(meta.batchName);
+  }
+
+  if (meta.intakeLabel || meta.academicYear) {
+    const intakePieces = [meta.intakeLabel, meta.academicYear].filter(Boolean).join(" ");
+    if (intakePieces) parts.push(intakePieces);
+  }
+
+  const text = parts.join(" · ");
 
   return (
     <div className="inline-flex max-w-xs items-center gap-2 rounded-full bg-muted/80 px-3 py-1 text-[11px] text-muted-foreground border border-border/60 shadow-sm backdrop-blur">
