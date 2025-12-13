@@ -25,15 +25,78 @@ export const DepartmentAnalytics = () => {
   const { data: departments = [] } = useDepartments();
   const { data: allTasks = [] } = useQuotaTasks();
 
-  const departmentColors: Record<string, string> = {
-    'Oral Maxillofacial Surgery': 'hsl(var(--red))',
-    'Oral Medicine and Radiology': 'hsl(var(--blue))',
-    'Periodontics': 'hsl(var(--green))',
-    'Pediatric Dentistry': 'hsl(var(--pink))',
-    'Endodontics': 'hsl(var(--purple))',
-    'Prosthodontics': 'hsl(var(--amber))',
-    'Orthodontics': 'hsl(var(--indigo))',
-    'Public Health Dentistry': 'hsl(var(--teal))',
+  const departmentColors: Record<string, { 
+    hsl: string; 
+    gradient: string; 
+    border: string; 
+    bg: string; 
+    text: string;
+    badge: string;
+  }> = {
+    'Oral Maxillofacial Surgery': { 
+      hsl: 'hsl(var(--red))', 
+      gradient: 'from-red-500 to-orange-500',
+      border: 'border-red-500/30',
+      bg: 'bg-gradient-to-br from-red-500/5 via-orange-500/5 to-red-500/5',
+      text: 'text-red-600 dark:text-red-400',
+      badge: 'bg-red-500/20 text-red-700 dark:text-red-300'
+    },
+    'Oral Medicine and Radiology': { 
+      hsl: 'hsl(var(--blue))', 
+      gradient: 'from-blue-500 to-cyan-500',
+      border: 'border-blue-500/30',
+      bg: 'bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-blue-500/5',
+      text: 'text-blue-600 dark:text-blue-400',
+      badge: 'bg-blue-500/20 text-blue-700 dark:text-blue-300'
+    },
+    'Periodontics': { 
+      hsl: 'hsl(var(--green))', 
+      gradient: 'from-green-500 to-emerald-500',
+      border: 'border-green-500/30',
+      bg: 'bg-gradient-to-br from-green-500/5 via-emerald-500/5 to-green-500/5',
+      text: 'text-green-600 dark:text-green-400',
+      badge: 'bg-green-500/20 text-green-700 dark:text-green-300'
+    },
+    'Pediatric Dentistry': { 
+      hsl: 'hsl(var(--pink))', 
+      gradient: 'from-pink-500 to-rose-500',
+      border: 'border-pink-500/30',
+      bg: 'bg-gradient-to-br from-pink-500/5 via-rose-500/5 to-pink-500/5',
+      text: 'text-pink-600 dark:text-pink-400',
+      badge: 'bg-pink-500/20 text-pink-700 dark:text-pink-300'
+    },
+    'Endodontics': { 
+      hsl: 'hsl(var(--purple))', 
+      gradient: 'from-purple-500 to-violet-500',
+      border: 'border-purple-500/30',
+      bg: 'bg-gradient-to-br from-purple-500/5 via-violet-500/5 to-purple-500/5',
+      text: 'text-purple-600 dark:text-purple-400',
+      badge: 'bg-purple-500/20 text-purple-700 dark:text-purple-300'
+    },
+    'Prosthodontics': { 
+      hsl: 'hsl(var(--amber))', 
+      gradient: 'from-amber-500 to-yellow-500',
+      border: 'border-amber-500/30',
+      bg: 'bg-gradient-to-br from-amber-500/5 via-yellow-500/5 to-amber-500/5',
+      text: 'text-amber-600 dark:text-amber-400',
+      badge: 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+    },
+    'Orthodontics': { 
+      hsl: 'hsl(var(--indigo))', 
+      gradient: 'from-indigo-500 to-blue-600',
+      border: 'border-indigo-500/30',
+      bg: 'bg-gradient-to-br from-indigo-500/5 via-blue-600/5 to-indigo-500/5',
+      text: 'text-indigo-600 dark:text-indigo-400',
+      badge: 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300'
+    },
+    'Public Health Dentistry': { 
+      hsl: 'hsl(var(--teal))', 
+      gradient: 'from-teal-500 to-green-600',
+      border: 'border-teal-500/30',
+      bg: 'bg-gradient-to-br from-teal-500/5 via-green-600/5 to-teal-500/5',
+      text: 'text-teal-600 dark:text-teal-400',
+      badge: 'bg-teal-500/20 text-teal-700 dark:text-teal-300'
+    },
   };
 
   const weeklyData = useMemo(() => {
@@ -109,7 +172,14 @@ export const DepartmentAnalytics = () => {
         percentage,
         weeklyAverage: weeklyAverage.toFixed(1),
         projectedDate,
-        color: departmentColors[dept.name] || 'hsl(var(--primary))',
+        colors: departmentColors[dept.name] || {
+          hsl: 'hsl(var(--primary))',
+          gradient: 'from-primary to-secondary',
+          border: 'border-primary/30',
+          bg: 'bg-gradient-to-br from-primary/5 to-secondary/5',
+          text: 'text-primary',
+          badge: 'bg-primary/20 text-primary'
+        },
       };
     }).filter(d => d.target > 0);
   }, [departments, allTasks, procedures, departmentColors]);
@@ -177,28 +247,33 @@ export const DepartmentAnalytics = () => {
             {departmentProgress.map((dept, index) => (
               <div
                 key={dept.name}
-                className="p-4 rounded-lg border border-border/50 bg-background/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1 animate-fade-in"
+                className={`p-4 rounded-lg border ${dept.colors.border} ${dept.colors.bg} hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in relative overflow-hidden`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-medium text-sm line-clamp-2">{dept.name}</h4>
+                <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${dept.colors.gradient} opacity-10 rounded-full blur-2xl`} />
+                <div className="flex items-start justify-between mb-3 relative z-10">
+                  <div className="flex items-center gap-2 flex-1">
+                    <div className={`h-8 w-8 rounded-full bg-gradient-to-br ${dept.colors.gradient} flex items-center justify-center shadow-md ring-2 ring-white/20 shrink-0`}>
+                      <Target className="h-4 w-4 text-white" />
+                    </div>
+                    <h4 className={`font-semibold text-sm line-clamp-2 ${dept.colors.text}`}>{dept.name}</h4>
+                  </div>
                   <Badge
-                    variant={dept.percentage >= 100 ? "default" : "secondary"}
-                    className="ml-2 shrink-0"
+                    className={`ml-2 shrink-0 ${dept.colors.badge} border-0`}
                   >
                     {dept.percentage}%
                   </Badge>
                 </div>
-                <div className="space-y-2 text-xs text-muted-foreground">
+                <div className="space-y-2 text-xs text-muted-foreground relative z-10">
                   <div className="flex justify-between">
                     <span>Progress:</span>
-                    <span className="font-medium text-foreground">
+                    <span className={`font-semibold ${dept.colors.text}`}>
                       {dept.completed} / {dept.target}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Weekly avg:</span>
-                    <span className="font-medium text-foreground">{dept.weeklyAverage}</span>
+                    <span className={`font-semibold ${dept.colors.text}`}>{dept.weeklyAverage}</span>
                   </div>
                   {dept.projectedDate && dept.percentage < 100 && (
                     <div className="flex items-center gap-1 pt-1 border-t border-border/50">
@@ -260,7 +335,7 @@ export const DepartmentAnalytics = () => {
                       <Bar
                         key={dept.id}
                         dataKey={dept.name}
-                        fill={departmentColors[dept.name] || 'hsl(var(--primary))'}
+                        fill={departmentColors[dept.name]?.hsl || 'hsl(var(--primary))'}
                         radius={[4, 4, 0, 0]}
                       />
                     ))}
@@ -291,7 +366,7 @@ export const DepartmentAnalytics = () => {
                         key={dept.id}
                         type="monotone"
                         dataKey={dept.name}
-                        stroke={departmentColors[dept.name] || 'hsl(var(--primary))'}
+                        stroke={departmentColors[dept.name]?.hsl || 'hsl(var(--primary))'}
                         strokeWidth={2}
                         dot={{ r: 3 }}
                         activeDot={{ r: 5 }}
