@@ -52,6 +52,50 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        error: {
+          DEFAULT: "hsl(var(--error))",
+          foreground: "hsl(var(--error-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
+        purple: {
+          DEFAULT: "hsl(var(--purple))",
+          foreground: "hsl(var(--purple-foreground))",
+        },
+        orange: {
+          DEFAULT: "hsl(var(--orange))",
+          foreground: "hsl(var(--orange-foreground))",
+        },
+        green: {
+          DEFAULT: "hsl(var(--green))",
+          foreground: "hsl(var(--green-foreground))",
+        },
+        yellow: {
+          DEFAULT: "hsl(var(--yellow))",
+          foreground: "hsl(var(--yellow-foreground))",
+        },
+        red: {
+          DEFAULT: "hsl(var(--red))",
+          foreground: "hsl(var(--red-foreground))",
+        },
+        teal: {
+          DEFAULT: "hsl(var(--teal))",
+          foreground: "hsl(var(--teal-foreground))",
+        },
+        pink: {
+          DEFAULT: "hsl(var(--pink))",
+          foreground: "hsl(var(--pink-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

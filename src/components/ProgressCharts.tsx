@@ -23,9 +23,9 @@ interface ProgressChartsProps {
 const PROCEDURE_TYPES: ProcedureType[] = ["Restorations", "Extractions", "Root Canals"];
 
 const CHART_COLORS = {
-  Restorations: "hsl(var(--primary))",
-  Extractions: "hsl(var(--accent))",
-  "Root Canals": "hsl(var(--accent-strong))",
+  Restorations: "hsl(var(--green))",
+  Extractions: "hsl(var(--orange))",
+  "Root Canals": "hsl(var(--purple))",
 };
 
 export const ProgressCharts = ({ procedures, targets }: ProgressChartsProps) => {
