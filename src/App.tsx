@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Target } from "lucide-react";
+import { UserMetaPill } from "@/components/UserMetaPill";
 import Dashboard from "./pages/Dashboard";
 import AddCase from "./pages/AddCase";
 import Analytics from "./pages/Analytics";
@@ -40,7 +41,9 @@ const App = () => (
                       </h1>
                     </div>
                   </div>
-                  {/* Role & batch indicator will be rendered by a small component to keep App lean */}
+                  <div className="flex items-center gap-3">
+                    <UserMetaPill />
+                  </div>
                 </header>
                 <main className="flex-1 p-6 overflow-auto">
                   <div className="max-w-7xl mx-auto">
