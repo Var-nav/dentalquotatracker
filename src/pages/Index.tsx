@@ -109,8 +109,11 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="border border-info/20 bg-gradient-to-br from-card via-info/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <Card
+              className="border border-info/20 bg-gradient-to-br from-card via-info/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
+              style={{ animationDelay: "0.1s" }}
+            >
               <CardHeader>
                 <CardTitle className="text-base">Total Departments</CardTitle>
               </CardHeader>
@@ -120,19 +123,25 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="border border-success/20 bg-gradient-to-br from-card via-success/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+            <Card
+              className="border border-success/20 bg-gradient-to-br from-card via-success/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
+              style={{ animationDelay: "0.2s" }}
+            >
               <CardHeader>
                 <CardTitle className="text-base">Total Quota Tasks</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-4xl font-bold text-success">{allTasks.length}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {allTasks.filter(t => t.is_predefined).length} predefined, {allTasks.filter(t => !t.is_predefined).length} custom
+                  {allTasks.filter((t) => t.is_predefined).length} predefined, {allTasks.filter((t) => !t.is_predefined).length} custom
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border border-warning/20 bg-gradient-to-br from-card via-warning/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up sm:col-span-2 lg:col-span-1" style={{ animationDelay: "0.3s" }}>
+            <Card
+              className="border border-warning/20 bg-gradient-to-br from-card via-warning/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up sm:col-span-2 lg:col-span-1"
+              style={{ animationDelay: "0.3s" }}
+            >
               <CardHeader>
                 <CardTitle className="text-base">Quick Tips</CardTitle>
               </CardHeader>
@@ -140,6 +149,30 @@ const Index = () => {
                 <p>• Click "Add Custom Task" to create new quota tasks</p>
                 <p>• Edit targets by clicking the edit icon</p>
                 <p>• Delete custom tasks with the trash icon</p>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="border border-destructive/20 bg-gradient-to-br from-card via-destructive/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up xl:col-span-1 sm:col-span-2"
+              style={{ animationDelay: "0.4s" }}
+            >
+              <CardHeader>
+                <CardTitle className="text-base">Patient Data Privacy</CardTitle>
+              </CardHeader>
+              <CardContent className="text-xs sm:text-sm text-muted-foreground space-y-2">
+                <p>
+                  • Access to patient procedures is restricted to authenticated users with a student or instructor role.
+                </p>
+                <p>
+                  • Do not enter full patient names, registration numbers, phone numbers, or any directly identifying details.
+                </p>
+                <p>
+                  • Use anonymized identifiers instead, such as initials plus a random code (for example, "AB-104"), and avoid combining
+                  details that could reveal identity.
+                </p>
+                <p>
+                  • Only record information required for clinical quota tracking. When in doubt, leave out sensitive personal data.
+                </p>
               </CardContent>
             </Card>
           </div>
