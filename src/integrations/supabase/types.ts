@@ -23,6 +23,7 @@ export type Database = {
           intake_label: string | null
           max_members: number | null
           name: string
+          user_id: string | null
           year_of_study: string | null
         }
         Insert: {
@@ -33,6 +34,7 @@ export type Database = {
           intake_label?: string | null
           max_members?: number | null
           name: string
+          user_id?: string | null
           year_of_study?: string | null
         }
         Update: {
@@ -43,6 +45,7 @@ export type Database = {
           intake_label?: string | null
           max_members?: number | null
           name?: string
+          user_id?: string | null
           year_of_study?: string | null
         }
         Relationships: []
