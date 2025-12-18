@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
@@ -18,6 +19,7 @@ interface BatchRow {
   intake_label: string | null;
 }
 
+
 const batchSchema = z.object({
   name: z.string().min(1, "Batch name is required"),
   year_of_study: z.string().min(1, "Year of study is required"),
@@ -27,6 +29,7 @@ const batchSchema = z.object({
 
 const ManageBatchesPage = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [batches, setBatches] = useState<BatchRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -63,53 +66,64 @@ const ManageBatchesPage = () => {
     load();
   }, [toast]);
 
-  const handleCreate = async () => {
-    const parsed = batchSchema.safeParse({
-      name,
-      year_of_study: yearOfStudy,
-      academic_year: academicYear,
-      intake_label: intakeLabel,
+const handleCreate = async () => {
+  if (!user) {
+    toast({
+      title: "Not signed in",
+      description: "You must be logged in to create batches.",
+      variant: "destructive",
     });
+    return;
+  }
 
-    if (!parsed.success) {
-      const firstError = parsed.error.issues[0]?.message ?? "Invalid input";
-      toast({
-        title: "Invalid details",
-        description: firstError,
-        variant: "destructive",
-      });
-      return;
-    }
+  const parsed = batchSchema.safeParse({
+    name,
+    year_of_study: yearOfStudy,
+    academic_year: academicYear,
+    intake_label: intakeLabel,
+  });
 
-    try {
-      setSaving(true);
-      const payload = parsed.data as any;
-      const { data, error } = await supabase
-        .from("batches")
-        .insert([payload])
-        .select("id, name, year_of_study, academic_year, intake_label")
-        .single();
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message ?? "Invalid input";
+    toast({
+      title: "Invalid details",
+      description: firstError,
+      variant: "destructive",
+    });
+    return;
+  }
 
-      if (error) throw error;
+  try {
+    setSaving(true);
+    const payload = { ...parsed.data, user_id: user.id } as any;
+    const { data, error } = await supabase
+      .from("batches")
+      .insert([payload])
+      .select("id, name, year_of_study, academic_year, intake_label")
+      .single();
 
-      setBatches((prev) => [data as BatchRow, ...prev]);
-      setName("");
-      toast({
-        title: "Batch created",
-        description: "New batch added for this academic year.",
-      });
-    } catch (err: any) {
-      console.error("Failed to create batch", err);
-      toast({
-        title: "Could not create batch",
-        description: err.message ?? "Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+    if (error) throw error;
 
+    setBatches((prev) => [data as BatchRow, ...prev]);
+    setName("");
+    toast({
+      title: "Batch created",
+      description: "New batch added for this academic year.",
+    });
+  } catch (err: any) {
+    console.error("Failed to create batch", err);
+    const isRlsError = err?.message?.includes("row violates row-level security policy");
+    toast({
+      title: "Could not create batch",
+      description: isRlsError
+        ? "You don't have permission to create batches. Please make sure you're logged in with the correct account."
+        : err?.message ?? "Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setSaving(false);
+  }
+};
   const groupedByYear = batches.reduce<Record<string, BatchRow[]>>((acc, b) => {
     const key = b.academic_year || "Academic year not set";
     acc[key] = acc[key] || [];
