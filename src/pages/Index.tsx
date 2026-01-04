@@ -6,6 +6,7 @@ import { DepartmentAccordion } from "@/components/DepartmentAccordion";
 import { DepartmentAnalytics } from "@/components/DepartmentAnalytics";
 import { AddProcedureForm } from "@/components/AddProcedureForm";
 import { Target } from "lucide-react";
+import { StudentLogbook } from "@/components/StudentLogbook";
 
 const Index = () => {
   const { data: departments = [], isLoading: departmentsLoading } = useDepartments();
@@ -109,7 +110,9 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <StudentLogbook />
+
+           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <Card
               className="border border-info/20 bg-gradient-to-br from-card via-info/5 to-card shadow-soft transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
               style={{ animationDelay: "0.1s" }}
