@@ -1,4 +1,5 @@
 import { DepartmentAnalytics } from "@/components/DepartmentAnalytics";
+import { InstructorSupervisorPanel } from "@/components/InstructorSupervisorPanel";
 
 const Analytics = () => {
   return (
@@ -8,11 +9,12 @@ const Analytics = () => {
           Analytics & Progress
         </h1>
         <p className="text-muted-foreground mt-2">
-          View weekly trends and projected completion dates
+          View weekly trends, projected completion dates, and instructor approvals.
         </p>
       </div>
 
       <DepartmentAnalytics />
+      <InstructorSupervisorPanel />
     </div>
   );
 };
