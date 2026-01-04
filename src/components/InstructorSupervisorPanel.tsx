@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
-import { Check, X } from "lucide-react";
+import { Check, Search, X } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   ChartContainer,
@@ -79,6 +80,31 @@ const batchChartConfig = {
   },
 } as const;
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightMatch(text: string, query: string) {
+  if (!query.trim()) return text;
+
+  const safeQuery = escapeRegExp(query.trim());
+  const regex = new RegExp(`(${safeQuery})`, "gi");
+  const parts = text.split(regex);
+
+  return parts.map((part, index) =>
+    regex.test(part) ? (
+      <span
+        key={index}
+        className="rounded px-0.5 bg-primary/15 text-primary-foreground"
+      >
+        {part}
+      </span>
+    ) : (
+      <span key={index}>{part}</span>
+    ),
+  );
+}
+
 export function InstructorSupervisorPanel() {
   const { toast } = useToast();
 
@@ -91,6 +117,21 @@ export function InstructorSupervisorPanel() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredApprovals = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return pendingApprovals;
+
+    return pendingApprovals.filter((item) => {
+      return (
+        item.studentName.toLowerCase().includes(query) ||
+        item.taskName.toLowerCase().includes(query) ||
+        item.patientId.toLowerCase().includes(query)
+      );
+    });
+  }, [pendingApprovals, searchTerm]);
 
   const handleVerify = (id: number) => {
     setVerifyingId(id);
@@ -131,44 +172,63 @@ export function InstructorSupervisorPanel() {
     setRejectReason("");
   };
 
+  const hasResults = filteredApprovals.length > 0;
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card className="border border-warning/30 bg-gradient-to-br from-card via-warning/5 to-card shadow-soft animate-fade-in">
-          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle className="text-lg sm:text-xl">
-                Instructor Approval Queue
-              </CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Review and verify student logbook entries in real-time.
-              </p>
+          <CardHeader className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="text-lg sm:text-xl">
+                  Instructor Approval Queue
+                </CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Review and verify student logbook entries in real-time.
+                </p>
+              </div>
+
+              <Badge className="bg-success/10 text-success-foreground border-success/40 border">
+                Tasks verified today:
+                <span className="ml-1 font-semibold">{verifiedToday}</span>
+              </Badge>
             </div>
 
-            <Badge className="bg-success/10 text-success-foreground border-success/40 border">
-              Tasks verified today: <span className="ml-1 font-semibold">{verifiedToday}</span>
-            </Badge>
+            <div className="relative mt-1 flex items-center gap-2">
+              <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search by student, patient, or task name"
+                className="pl-9 text-sm bg-background/80 border-border/60 focus-visible:ring-primary/40"
+              />
+            </div>
           </CardHeader>
 
-          <CardContent className="space-y-3">
-            {pendingApprovals.length === 0 ? (
+          <CardContent className="space-y-3 pt-4">
+            {!hasResults ? (
               <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-6 text-center text-sm text-muted-foreground">
-                No pending approvals. Enjoy your coffee break!
+                {pendingApprovals.length === 0
+                  ? "No pending approvals. Enjoy your coffee break!"
+                  : "No approvals match this search. Try a different name or ID."}
               </div>
             ) : (
               <div className="space-y-3">
-                {pendingApprovals.map((item, index) => (
+                {filteredApprovals.map((item, index) => (
                   <div
                     key={item.id}
                     className={`group flex items-start gap-3 rounded-lg border border-border/60 bg-background/70 p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md animate-fade-in ${
-                      verifyingId === item.id ? "animate-scale-out bg-success/10 border-success/40" : ""
+                      verifyingId === item.id
+                        ? "animate-scale-out bg-success/10 border-success/40"
+                        : ""
                     }`}
                     style={{ animationDelay: `${index * 40}ms` }}
                   >
                     <div className="flex-1 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-foreground">
-                          {item.taskName}
+                          {highlightMatch(item.taskName, searchTerm)}
                         </p>
                         <Badge
                           variant="outline"
@@ -178,10 +238,16 @@ export function InstructorSupervisorPanel() {
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Student: <span className="font-medium text-foreground">{item.studentName}</span>
+                        Student:{" "}
+                        <span className="font-medium text-foreground">
+                          {highlightMatch(item.studentName, searchTerm)}
+                        </span>
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Patient ID: <span className="font-medium text-foreground">{item.patientId}</span>
+                        Patient ID:{" "}
+                        <span className="font-medium text-foreground">
+                          {highlightMatch(item.patientId, searchTerm)}
+                        </span>
                       </p>
                     </div>
 
