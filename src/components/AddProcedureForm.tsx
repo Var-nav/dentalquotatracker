@@ -50,6 +50,9 @@ export const AddProcedureForm = () => {
   const recognitionRef = useRef<any>(null);
   const aiCorrectionEnabledRef = useRef(true);
 
+  const [lastRawTranscript, setLastRawTranscript] = useState<string | null>(null);
+  const [lastCorrectedTranscript, setLastCorrectedTranscript] = useState<string | null>(null);
+
   // Track which fields were manually entered (don't overwrite them)
   const [manuallySet, setManuallySet] = useState({
     department: false,
@@ -72,6 +75,7 @@ export const AddProcedureForm = () => {
 
       recognitionRef.current.onresult = async (event: any) => {
         const transcript = event.results[0][0].transcript;
+        setLastRawTranscript(transcript);
         let finalText = transcript;
 
         if (aiCorrectionEnabledRef.current) {
@@ -81,16 +85,22 @@ export const AddProcedureForm = () => {
               description: "Fixing medical terms and misheard words",
             });
 
-            const { data, error } = await supabase.functions.invoke('correct-clinical-note', {
+            const { data, error } = await supabase.functions.invoke("correct-clinical-note", {
               body: { text: transcript },
             });
 
             if (!error && data?.correctedText) {
               finalText = data.correctedText as string;
+              setLastCorrectedTranscript(finalText);
+            } else {
+              setLastCorrectedTranscript(null);
             }
           } catch (err) {
-            console.warn('AI correction failed, using raw transcript', err);
+            console.warn("AI correction failed, using raw transcript", err);
+            setLastCorrectedTranscript(null);
           }
+        } else {
+          setLastCorrectedTranscript(null);
         }
 
         setMagicFillText(finalText);
@@ -294,6 +304,15 @@ export const AddProcedureForm = () => {
             </div>
             {isListening && (
               <p className="text-xs text-primary animate-pulse">🎤 Listening...</p>
+            )}
+            {lastRawTranscript && lastCorrectedTranscript && lastRawTranscript !== lastCorrectedTranscript && (
+              <div className="mt-2 rounded-md bg-muted/60 p-2 border border-border/60 space-y-1">
+                <p className="text-[10px] font-medium text-muted-foreground">AI correction preview</p>
+                <p className="text-[11px] text-muted-foreground">Original: {lastRawTranscript}</p>
+                <p className="text-[11px] text-foreground">
+                  Corrected: {lastCorrectedTranscript}
+                </p>
+              </div>
             )}
             <div className="flex items-center justify-between pt-1">
               <p className="text-xs text-muted-foreground">

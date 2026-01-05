@@ -218,6 +218,8 @@ function UserContextSection() {
       ? "Learner"
       : meta.role === "instructor"
       ? "Senior learner"
+      : meta.role === "co-admin"
+      ? "Co-Admin"
       : "Admin"
     : "";
 

@@ -456,6 +456,48 @@ export type Database = {
         }
         Relationships: []
       }
+      whitelist_invites: {
+        Row: {
+          assigned_batch: string | null
+          assigned_department: string | null
+          assigned_role: Database["public"]["Enums"]["app_role"]
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          assigned_batch?: string | null
+          assigned_department?: string | null
+          assigned_role: Database["public"]["Enums"]["app_role"]
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          assigned_batch?: string | null
+          assigned_department?: string | null
+          assigned_role?: Database["public"]["Enums"]["app_role"]
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whitelist_invites_assigned_batch_fkey"
+            columns: ["assigned_batch"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whitelist_invites_assigned_department_fkey"
+            columns: ["assigned_department"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -475,7 +517,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "instructor" | "student"
+      app_role: "admin" | "instructor" | "student" | "co-admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -603,7 +645,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "instructor", "student"],
+      app_role: ["admin", "instructor", "student", "co-admin"],
     },
   },
 } as const
