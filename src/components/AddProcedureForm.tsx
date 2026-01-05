@@ -33,7 +33,6 @@ export const AddProcedureForm = () => {
 
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
   const [selectedTask, setSelectedTask] = useState<string>("");
-  const [patientName, setPatientName] = useState("");
   const [date, setDate] = useState<Date>();
   const [supervisorName, setSupervisorName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,7 +49,7 @@ export const AddProcedureForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!patientName.trim() || !selectedDepartment || !selectedTask || !date || !supervisorName.trim()) {
+    if (!selectedDepartment || !selectedTask || !date || !supervisorName.trim()) {
       toast({
         title: "Missing information",
         description: "Please complete all fields before adding a case.",
@@ -65,16 +64,15 @@ export const AddProcedureForm = () => {
       const task = allTasks.find(t => t.id === selectedTask);
       
       await addProcedure({
-        patient_name: patientName.trim(),
         procedure_type: (task?.task_name || "Unknown") as any, // Legacy field, actual tracking is by quota_task_id
         procedure_date: format(date, "yyyy-MM-dd"),
         supervisor_name: supervisorName.trim(),
         department_id: selectedDepartment,
         quota_task_id: selectedTask,
+        status: 'pending',
       });
 
       // Reset form
-      setPatientName("");
       setSelectedDepartment("");
       setSelectedTask("");
       setDate(undefined);
@@ -82,7 +80,7 @@ export const AddProcedureForm = () => {
 
       toast({
         title: "Case added",
-        description: `${task?.task_name} for ${patientName.trim()} recorded successfully.`,
+        description: `${task?.task_name} recorded successfully.`,
       });
     } catch (error) {
       toast({
@@ -166,22 +164,10 @@ export const AddProcedureForm = () => {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+          </Select>
           </div>
 
           <div className="space-y-2 animate-fade-in" style={{ animationDelay: "0.15s" }}>
-            <Label htmlFor="patientName">Patient Name</Label>
-            <Input
-              id="patientName"
-              value={patientName}
-              onChange={(e) => setPatientName(e.target.value)}
-              placeholder="e.g. J. Smith"
-              autoComplete="off"
-              className="transition-all duration-200 focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div className="space-y-2 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <Label>Procedure Date</Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -207,7 +193,7 @@ export const AddProcedureForm = () => {
             </Popover>
           </div>
 
-          <div className="space-y-2 animate-fade-in" style={{ animationDelay: "0.25s" }}>
+          <div className="space-y-2 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <Label htmlFor="supervisorName">Supervisor Name</Label>
             <Input
               id="supervisorName"
@@ -223,7 +209,7 @@ export const AddProcedureForm = () => {
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl animate-fade-in"
-            style={{ animationDelay: "0.3s" }}
+            style={{ animationDelay: "0.25s" }}
           >
             <Plus className="h-4 w-4 mr-2" />
             {isSubmitting ? "Adding..." : "Add Case"}
