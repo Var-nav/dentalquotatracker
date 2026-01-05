@@ -45,6 +45,16 @@ const navItems = [
     color: "text-purple-600 dark:text-purple-400",
   },
   {
+    title: "Messages",
+    url: "/messages",
+    icon: MessageSquare,
+    gradient: "from-indigo-500 to-purple-500",
+    color: "text-indigo-600 dark:text-indigo-400",
+  },
+];
+
+const accountNavItems = [
+  {
     title: "My Account",
     url: "/account",
     icon: UserCircle2,
@@ -57,13 +67,6 @@ const navItems = [
     icon: Layers3,
     gradient: "from-amber-500 to-orange-500",
     color: "text-amber-600 dark:text-amber-400",
-  },
-  {
-    title: "Messages",
-    url: "/messages",
-    icon: MessageSquare,
-    gradient: "from-indigo-500 to-purple-500",
-    color: "text-indigo-600 dark:text-indigo-400",
   },
 ];
 
@@ -93,12 +96,9 @@ export function AppSidebar() {
   const { meta } = useUserMeta();
 
   const isActive = (path: string) => currentPath === path;
-
-  // Combine nav items, show admin items only if user is admin
-  const visibleItems = [
-    ...navItems,
-    ...(meta.role === "admin" ? adminNavItems : []),
-  ];
+  
+  // Check if any account item is active
+  const isAccountSectionActive = accountNavItems.some((item) => isActive(item.url));
 
   return (
     <Sidebar className={open ? "w-72" : "w-20"} collapsible="icon">
@@ -125,7 +125,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
-              {visibleItems.map((item) => {
+              {navItems.map((item) => {
                 const active = isActive(item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -174,6 +174,120 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup className="px-3">
+          <SidebarGroupLabel className={`${open ? "text-xs font-semibold uppercase tracking-wider mb-3" : "sr-only"} text-muted-foreground px-2`}>
+            My Account
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-2">
+              {accountNavItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild className="h-auto p-0">
+                      <NavLink
+                        to={item.url}
+                        end
+                        className={`
+                          group relative overflow-hidden
+                          ${open ? "px-4 py-3" : "px-3 py-3 justify-center"}
+                          rounded-xl transition-all duration-300
+                          ${active 
+                            ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg scale-105` 
+                            : 'hover:bg-muted/70 hover:scale-105 hover:shadow-md'
+                          }
+                        `}
+                        activeClassName=""
+                      >
+                        {active && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent animate-pulse" />
+                        )}
+                        <div className="relative z-10 flex items-center gap-3">
+                          <item.icon 
+                            className={`
+                              ${open ? "h-5 w-5" : "h-6 w-6"} 
+                              shrink-0 transition-all duration-300
+                              ${active ? 'text-white' : item.color}
+                              group-hover:scale-110
+                            `} 
+                            strokeWidth={active ? 2.5 : 2}
+                          />
+                          {open && (
+                            <span className={`font-semibold text-sm transition-all duration-300 ${active ? 'text-white' : 'text-foreground'}`}>
+                              {item.title}
+                            </span>
+                          )}
+                        </div>
+                        {active && open && (
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-white animate-pulse" />
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {meta.role === "admin" && (
+          <SidebarGroup className="px-3">
+            <SidebarGroupLabel className={`${open ? "text-xs font-semibold uppercase tracking-wider mb-3" : "sr-only"} text-muted-foreground px-2`}>
+              Admin
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-2">
+                {adminNavItems.map((item) => {
+                  const active = isActive(item.url);
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild className="h-auto p-0">
+                        <NavLink
+                          to={item.url}
+                          end
+                          className={`
+                            group relative overflow-hidden
+                            ${open ? "px-4 py-3" : "px-3 py-3 justify-center"}
+                            rounded-xl transition-all duration-300
+                            ${active 
+                              ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg scale-105` 
+                              : 'hover:bg-muted/70 hover:scale-105 hover:shadow-md'
+                            }
+                          `}
+                          activeClassName=""
+                        >
+                          {active && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent animate-pulse" />
+                          )}
+                          <div className="relative z-10 flex items-center gap-3">
+                            <item.icon 
+                              className={`
+                                ${open ? "h-5 w-5" : "h-6 w-6"} 
+                                shrink-0 transition-all duration-300
+                                ${active ? 'text-white' : item.color}
+                                group-hover:scale-110
+                              `} 
+                              strokeWidth={active ? 2.5 : 2}
+                            />
+                            {open && (
+                              <span className={`font-semibold text-sm transition-all duration-300 ${active ? 'text-white' : 'text-foreground'}`}>
+                                {item.title}
+                              </span>
+                            )}
+                          </div>
+                          {active && open && (
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-white animate-pulse" />
+                          )}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {open && (
           <div className="mt-auto p-4 border-t border-border/50 bg-gradient-to-br from-primary/5 to-secondary/5 animate-fade-in">
