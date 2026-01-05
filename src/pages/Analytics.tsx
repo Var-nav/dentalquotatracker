@@ -1,5 +1,6 @@
 import { DepartmentAnalytics } from "@/components/DepartmentAnalytics";
 import { InstructorSupervisorPanel } from "@/components/InstructorSupervisorPanel";
+import { PeerComparisonChart } from "@/components/PeerComparisonChart";
 
 const Analytics = () => {
   return (
@@ -13,6 +14,7 @@ const Analytics = () => {
         </p>
       </div>
 
+      <PeerComparisonChart />
       <DepartmentAnalytics />
       <InstructorSupervisorPanel />
     </div>
