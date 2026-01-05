@@ -3,13 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useQuotaTasks } from "@/hooks/useQuotaTasks";
 import { DepartmentAccordion } from "@/components/DepartmentAccordion";
+import { GamificationWidget } from "@/components/GamificationWidget";
+import { useUserMeta } from "@/hooks/useUserMeta";
 import { Target } from "lucide-react";
 
 const Dashboard = () => {
   const { data: departments = [], isLoading: departmentsLoading } = useDepartments();
   const { data: allTasks = [], isLoading: tasksLoading } = useQuotaTasks();
+  const { meta } = useUserMeta();
 
   const isLoading = departmentsLoading || tasksLoading;
+  const isStudent = meta.role === "student";
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -21,6 +25,9 @@ const Dashboard = () => {
           Track your clinical requirements across all departments
         </p>
       </div>
+
+      {/* Gamification Widget - Only for Students */}
+      {isStudent && <GamificationWidget />}
 
       <Card className="border border-primary/20 bg-gradient-to-br from-card via-primary/5 to-card shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
         <CardHeader className="flex flex-row items-center gap-3 pb-4">
