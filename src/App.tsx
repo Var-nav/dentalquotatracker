@@ -22,7 +22,6 @@ import MessagesPage from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import OnboardingPage from "./pages/Onboarding";
-import AssessmentsPage from "./pages/Assessments";
 import { AuthProvider } from "@/hooks/useAuth";
 
 
@@ -85,7 +84,6 @@ const App = () => {
                       <Route path="/" element={<Dashboard />} />
                       <Route path="/add-case" element={<AddCase />} />
                       <Route path="/analytics" element={<Analytics />} />
-                      <Route path="/assessments" element={<AssessmentsPage />} />
                       <Route path="/history" element={<History />} />
                       <Route path="/account" element={<MyAccountPage />} />
                       <Route path="/batches" element={<ManageBatchesPage />} />
