@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Check, Search, X } from "lucide-react";
 
@@ -22,45 +22,19 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProcedures } from "@/hooks/useProcedures";
+import { useQuery } from "@tanstack/react-query";
 
-interface ApprovalRequest {
-  id: number;
+interface PendingProcedure {
+  id: string;
   studentName: string;
   taskName: string;
   date: string;
-  patientId: string;
+  student_id: string;
+  department_id: string;
 }
-
-const INITIAL_PENDING_APPROVALS: ApprovalRequest[] = [
-  {
-    id: 1,
-    studentName: "Ayesha Khan",
-    taskName: "Complete Denture",
-    date: new Date().toISOString(),
-    patientId: "CD-304",
-  },
-  {
-    id: 2,
-    studentName: "Rahul Mehta",
-    taskName: "Root Canal (Mandibular Molar)",
-    date: new Date().toISOString(),
-    patientId: "RC-212",
-  },
-  {
-    id: 3,
-    studentName: "Sara Lee",
-    taskName: "Simple Extraction",
-    date: new Date().toISOString(),
-    patientId: "EX-118",
-  },
-  {
-    id: 4,
-    studentName: "James Wong",
-    taskName: "Scaling & Polishing",
-    date: new Date().toISOString(),
-    patientId: "SP-087",
-  },
-];
 
 const BATCH_COMPLETION_DATA = [
   { name: "Week 1", batchA: 30, batchB: 25 },
@@ -107,69 +81,178 @@ function highlightMatch(text: string, query: string) {
 
 export function InstructorSupervisorPanel() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { updateProcedure } = useProcedures();
 
-  const [pendingApprovals, setPendingApprovals] = useState<ApprovalRequest[]>(
-    INITIAL_PENDING_APPROVALS,
-  );
   const [verifiedToday, setVerifiedToday] = useState(0);
-  const [verifyingId, setVerifyingId] = useState<number | null>(null);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Get instructor's department
+  const { data: instructorProfile } = useQuery({
+    queryKey: ["instructor-profile", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("department_id")
+        .eq("id", user.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  // Get department name
+  const { data: department } = useQuery({
+    queryKey: ["department", instructorProfile?.department_id],
+    queryFn: async () => {
+      if (!instructorProfile?.department_id) return null;
+      const { data, error } = await supabase
+        .from("departments")
+        .select("name")
+        .eq("id", instructorProfile.department_id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!instructorProfile?.department_id,
+  });
+
+  // Fetch pending procedures with student names
+  const { data: pendingProcedures = [], refetch } = useQuery({
+    queryKey: ["pending-procedures", instructorProfile?.department_id],
+    queryFn: async () => {
+      if (!instructorProfile?.department_id) return [];
+      
+      const { data: procedures, error } = await supabase
+        .from("procedures")
+        .select("id, student_id, procedure_type, procedure_date, department_id, quota_task_id")
+        .eq("department_id", instructorProfile.department_id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch student names and task names
+      const studentIds = [...new Set(procedures.map(p => p.student_id).filter(Boolean))];
+      const taskIds = [...new Set(procedures.map(p => p.quota_task_id).filter(Boolean))];
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", studentIds);
+
+      const { data: tasks } = await supabase
+        .from("quota_tasks")
+        .select("id, task_name")
+        .in("id", taskIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
+      const taskMap = new Map(tasks?.map(t => [t.id, t.task_name]) || []);
+
+      return procedures.map(p => ({
+        id: p.id,
+        studentName: profileMap.get(p.student_id!) || "Unknown Student",
+        taskName: taskMap.get(p.quota_task_id!) || p.procedure_type,
+        date: p.procedure_date,
+        student_id: p.student_id!,
+        department_id: p.department_id!,
+      })) as PendingProcedure[];
+    },
+    enabled: !!instructorProfile?.department_id,
+  });
+
   const filteredApprovals = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return pendingApprovals;
+    if (!query) return pendingProcedures;
 
-    return pendingApprovals.filter((item) => {
+    return pendingProcedures.filter((item) => {
       return (
         item.studentName.toLowerCase().includes(query) ||
-        item.taskName.toLowerCase().includes(query) ||
-        item.patientId.toLowerCase().includes(query)
+        item.taskName.toLowerCase().includes(query)
       );
     });
-  }, [pendingApprovals, searchTerm]);
+  }, [pendingProcedures, searchTerm]);
 
-  const handleVerify = (id: number) => {
+  const handleVerify = async (id: string) => {
     setVerifyingId(id);
 
-    setTimeout(() => {
-      setPendingApprovals((prev) => prev.filter((item) => item.id !== id));
+    try {
+      await updateProcedure({
+        id,
+        updates: { status: "verified" },
+      });
+
       setVerifiedToday((count) => count + 1);
-      setVerifyingId(null);
+      refetch();
 
       toast({
         title: "Task verified",
         description: "Logbook entry has been marked as verified.",
       });
-    }, 260);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to verify task. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setVerifyingId(null);
+    }
   };
 
-  const openRejectDialog = (id: number) => {
+  const openRejectDialog = (id: string) => {
     setRejectingId(id);
     setRejectReason("");
     setRejectDialogOpen(true);
   };
 
-  const handleConfirmReject = () => {
-    if (rejectingId === null) return;
+  const handleConfirmReject = async () => {
+    if (rejectingId === null || !rejectReason.trim()) {
+      toast({
+        title: "Rejection reason required",
+        description: "Please provide a reason for rejection.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setPendingApprovals((prev) => prev.filter((item) => item.id !== rejectingId));
-    setRejectDialogOpen(false);
+    try {
+      await updateProcedure({
+        id: rejectingId,
+        updates: { 
+          status: "rejected",
+          rejection_reason: rejectReason.trim(),
+        },
+      });
 
-    toast({
-      title: "Task rejected",
-      description: rejectReason
-        ? `Reason: ${rejectReason}`
-        : "The task has been rejected.",
-      variant: "destructive",
-    });
+      refetch();
+      setRejectDialogOpen(false);
 
-    setRejectingId(null);
-    setRejectReason("");
+      toast({
+        title: "Task rejected",
+        description: `Reason: ${rejectReason}`,
+        variant: "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reject task. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setRejectingId(null);
+      setRejectReason("");
+    }
   };
 
   const hasResults = filteredApprovals.length > 0;
@@ -200,7 +283,7 @@ export function InstructorSupervisorPanel() {
               <Input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search by student, patient, or task name"
+                placeholder="Search by student or task name"
                 className="pl-9 text-sm bg-background/80 border-border/60 focus-visible:ring-primary/40"
               />
             </div>
@@ -209,9 +292,9 @@ export function InstructorSupervisorPanel() {
           <CardContent className="space-y-3 pt-4">
             {!hasResults ? (
               <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-6 text-center text-sm text-muted-foreground">
-                {pendingApprovals.length === 0
-                  ? "No pending approvals. Enjoy your coffee break!"
-                  : "No approvals match this search. Try a different name or ID."}
+                {pendingProcedures.length === 0
+                  ? `No pending verifications for ${department?.name || "your department"}.`
+                  : "No approvals match this search. Try a different name."}
               </div>
             ) : (
               <div className="space-y-3">
@@ -241,12 +324,6 @@ export function InstructorSupervisorPanel() {
                         Student:{" "}
                         <span className="font-medium text-foreground">
                           {highlightMatch(item.studentName, searchTerm)}
-                        </span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Patient ID:{" "}
-                        <span className="font-medium text-foreground">
-                          {highlightMatch(item.patientId, searchTerm)}
                         </span>
                       </p>
                     </div>
@@ -327,7 +404,7 @@ export function InstructorSupervisorPanel() {
           <DialogHeader>
             <DialogTitle>Reject logbook entry</DialogTitle>
             <DialogDescription>
-              Add an optional note so the student knows exactly what to fix.
+              Provide a clear reason so the student knows what needs to be corrected.
             </DialogDescription>
           </DialogHeader>
 
@@ -355,7 +432,12 @@ export function InstructorSupervisorPanel() {
             >
               Cancel
             </Button>
-            <Button type="button" variant="destructive" onClick={handleConfirmReject}>
+            <Button 
+              type="button" 
+              variant="destructive" 
+              onClick={handleConfirmReject}
+              disabled={!rejectReason.trim()}
+            >
               Confirm reject
             </Button>
           </DialogFooter>
