@@ -16,6 +16,7 @@ import Analytics from "./pages/Analytics";
 import History from "./pages/History";
 import MyAccountPage from "./pages/MyAccount";
 import ManageBatchesPage from "./pages/ManageBatches";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import OnboardingPage from "./pages/Onboarding";
@@ -86,6 +87,7 @@ const App = () => {
                       <Route path="/history" element={<History />} />
                       <Route path="/account" element={<MyAccountPage />} />
                       <Route path="/batches" element={<ManageBatchesPage />} />
+                      <Route path="/admin" element={<AdminPanel />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

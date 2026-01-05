@@ -1,4 +1,4 @@
-import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2, Layers3, Calendar } from "lucide-react";
+import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2, Layers3, Calendar, Shield } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 
@@ -66,12 +66,31 @@ const navItems = [
     color: "text-amber-600 dark:text-amber-400",
   },
 ];
+
+const adminNavItems = [
+  {
+    title: "Admin Panel",
+    url: "/admin",
+    icon: Shield,
+    gradient: "from-red-500 to-rose-500",
+    color: "text-red-600 dark:text-red-400",
+    adminOnly: true,
+  },
+];
+
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { meta } = useUserMeta();
 
   const isActive = (path: string) => currentPath === path;
+
+  // Combine nav items, show admin items only if user is admin
+  const visibleItems = [
+    ...navItems,
+    ...(meta.role === "admin" ? adminNavItems : []),
+  ];
 
   return (
     <Sidebar className={open ? "w-72" : "w-20"} collapsible="icon">
@@ -98,7 +117,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
-              {navItems.map((item) => {
+              {visibleItems.map((item) => {
                 const active = isActive(item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -190,7 +209,9 @@ function UserContextSection() {
   const roleLabel = meta.role
     ? meta.role === "student"
       ? "Student"
-      : "Instructor"
+      : meta.role === "instructor"
+      ? "Instructor"
+      : "Admin"
     : "";
 
   return (
