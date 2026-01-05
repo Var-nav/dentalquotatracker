@@ -73,7 +73,7 @@ export type Database = {
           created_at: string
           department_id: string | null
           id: string
-          patient_name: string
+          patient_name: string | null
           patient_op_number: string | null
           procedure_date: string
           procedure_type: string
@@ -87,7 +87,7 @@ export type Database = {
           created_at?: string
           department_id?: string | null
           id?: string
-          patient_name: string
+          patient_name?: string | null
           patient_op_number?: string | null
           procedure_date: string
           procedure_type: string
@@ -101,7 +101,7 @@ export type Database = {
           created_at?: string
           department_id?: string | null
           id?: string
-          patient_name?: string
+          patient_name?: string | null
           patient_op_number?: string | null
           procedure_date?: string
           procedure_type?: string
