@@ -22,11 +22,13 @@ import { useDepartments } from "@/hooks/useDepartments";
 import { useQuotaTasks } from "@/hooks/useQuotaTasks";
 import { useProcedures } from "@/hooks/useProcedures";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const AddProcedureForm = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { data: departments = [] } = useDepartments();
   const { data: allTasks = [] } = useQuotaTasks();
   const { addProcedure } = useProcedures();
@@ -70,6 +72,7 @@ export const AddProcedureForm = () => {
         department_id: selectedDepartment,
         quota_task_id: selectedTask,
         status: 'pending',
+        student_id: user?.id,
       });
 
       // Reset form
@@ -79,8 +82,8 @@ export const AddProcedureForm = () => {
       setSupervisorName("");
 
       toast({
-        title: "Case added",
-        description: `${task?.task_name} recorded successfully.`,
+        title: "Case logged! Marked as In Progress.",
+        description: `${task?.task_name} has been submitted for verification.`,
       });
     } catch (error) {
       toast({
