@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserMeta } from "@/hooks/useUserMeta";
 import { useTheme } from "next-themes";
+import { ThemeCustomizer } from "@/components/ThemeCustomizer";
 
 const themeOptions = [
   { value: "light", label: "Light", icon: SunMedium },
@@ -78,7 +79,7 @@ const MyAccountPage = () => {
 
       <Card className="border border-border/60 bg-card/80">
         <CardHeader>
-          <CardTitle className="text-base">Appearance</CardTitle>
+          <CardTitle className="text-base">Light/Dark Mode</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
           {themeOptions.map((opt) => {
@@ -100,6 +101,8 @@ const MyAccountPage = () => {
           })}
         </CardContent>
       </Card>
+
+      <ThemeCustomizer />
     </div>
   );
 };
