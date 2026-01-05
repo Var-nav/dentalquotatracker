@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
-import { Plus } from "lucide-react";
+import { Plus, Mic, MicOff, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseClinicalNote } from "@/lib/clinicalParser";
 
 export const AddProcedureForm = () => {
   const { toast } = useToast();
@@ -38,14 +40,118 @@ export const AddProcedureForm = () => {
   const [date, setDate] = useState<Date>();
   const [supervisorName, setSupervisorName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Magic Fill state
+  const [magicFillText, setMagicFillText] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  // Track which fields were manually entered (don't overwrite them)
+  const [manuallySet, setManuallySet] = useState({
+    department: false,
+    task: false,
+    supervisor: false
+  });
 
   const availableTasks = allTasks.filter(
     (task) => task.department_id === selectedDepartment
   );
 
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setMagicFillText(transcript);
+        handleMagicFill(transcript);
+      };
+
+      recognitionRef.current.onerror = () => {
+        setIsListening(false);
+        toast({
+          title: "Microphone Error",
+          description: "Could not access microphone. Please check permissions.",
+          variant: "destructive",
+        });
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
   const handleDepartmentChange = (value: string) => {
     setSelectedDepartment(value);
     setSelectedTask(""); // Reset task when department changes
+    setManuallySet(prev => ({ ...prev, department: true, task: true }));
+  };
+
+  const handleTaskChange = (value: string) => {
+    setSelectedTask(value);
+    setManuallySet(prev => ({ ...prev, task: true }));
+  };
+
+  const handleSupervisorChange = (value: string) => {
+    setSupervisorName(value);
+    setManuallySet(prev => ({ ...prev, supervisor: true }));
+  };
+
+  const toggleVoiceRecognition = () => {
+    if (!recognitionRef.current) {
+      toast({
+        title: "Not Supported",
+        description: "Speech recognition is not supported in this browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setIsListening(true);
+      recognitionRef.current.start();
+    }
+  };
+
+  const handleMagicFill = (text: string) => {
+    if (!text.trim()) return;
+
+    const parsed = parseClinicalNote(text, departments, allTasks);
+
+    // Only auto-fill fields that weren't manually set
+    if (parsed.department && !manuallySet.department) {
+      setSelectedDepartment(parsed.department);
+    }
+    
+    if (parsed.task && !manuallySet.task) {
+      setSelectedTask(parsed.task);
+    }
+    
+    if (parsed.supervisorName && !manuallySet.supervisor) {
+      setSupervisorName(parsed.supervisorName);
+    }
+
+    // Show feedback
+    const filledFields = [];
+    if (parsed.department) filledFields.push("Department");
+    if (parsed.task) filledFields.push("Quota Task");
+    if (parsed.supervisorName) filledFields.push("Supervisor");
+
+    if (filledFields.length > 0) {
+      toast({
+        title: "✨ Magic Fill Applied",
+        description: `Auto-filled: ${filledFields.join(", ")}`,
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,6 +186,8 @@ export const AddProcedureForm = () => {
       setSelectedTask("");
       setDate(undefined);
       setSupervisorName("");
+      setMagicFillText("");
+      setManuallySet({ department: false, task: false, supervisor: false });
 
       toast({
         title: "Case logged! Marked as In Progress.",
@@ -122,6 +230,44 @@ export const AddProcedureForm = () => {
       </CardHeader>
       <CardContent className="relative z-10">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Magic Fill Section */}
+          <div className="space-y-2 p-4 rounded-lg border border-primary/30 bg-gradient-to-br from-primary/5 to-purple/5 animate-fade-in">
+            <Label htmlFor="magicFill" className="flex items-center gap-2 text-primary">
+              <Sparkles className="h-4 w-4" />
+              ✨ Magic Fill
+            </Label>
+            <div className="flex gap-2">
+              <Textarea
+                id="magicFill"
+                value={magicFillText}
+                onChange={(e) => {
+                  setMagicFillText(e.target.value);
+                }}
+                onBlur={() => handleMagicFill(magicFillText)}
+                placeholder='Example: "Did an extraction in Surgery with Dr. Smith"'
+                className="min-h-[60px] resize-none"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={toggleVoiceRecognition}
+                className={cn(
+                  "shrink-0 transition-all",
+                  isListening && "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+                )}
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+            </div>
+            {isListening && (
+              <p className="text-xs text-primary animate-pulse">🎤 Listening...</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Speak or type naturally - AI will auto-fill the fields below
+            </p>
+          </div>
+
           <div className="space-y-2 animate-fade-in" style={{ animationDelay: "0.05s" }}>
             <Label htmlFor="department">Department</Label>
             <Select value={selectedDepartment} onValueChange={handleDepartmentChange}>
@@ -149,7 +295,7 @@ export const AddProcedureForm = () => {
             <Label htmlFor="quotaTask">Quota Task</Label>
             <Select
               value={selectedTask}
-              onValueChange={setSelectedTask}
+              onValueChange={handleTaskChange}
               disabled={!selectedDepartment}
             >
               <SelectTrigger className="transition-all duration-200 focus:ring-2 focus:ring-primary">
@@ -201,7 +347,7 @@ export const AddProcedureForm = () => {
             <Input
               id="supervisorName"
               value={supervisorName}
-              onChange={(e) => setSupervisorName(e.target.value)}
+              onChange={(e) => handleSupervisorChange(e.target.value)}
               placeholder="e.g. Dr. Johnson"
               autoComplete="off"
               className="transition-all duration-200 focus:ring-2 focus:ring-primary"
