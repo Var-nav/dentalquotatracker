@@ -74,9 +74,13 @@ export type Database = {
           department_id: string | null
           id: string
           patient_name: string
+          patient_op_number: string | null
           procedure_date: string
           procedure_type: string
           quota_task_id: string | null
+          rejection_reason: string | null
+          status: string | null
+          student_id: string | null
           supervisor_name: string
         }
         Insert: {
@@ -84,9 +88,13 @@ export type Database = {
           department_id?: string | null
           id?: string
           patient_name: string
+          patient_op_number?: string | null
           procedure_date: string
           procedure_type: string
           quota_task_id?: string | null
+          rejection_reason?: string | null
+          status?: string | null
+          student_id?: string | null
           supervisor_name: string
         }
         Update: {
@@ -94,9 +102,13 @@ export type Database = {
           department_id?: string | null
           id?: string
           patient_name?: string
+          patient_op_number?: string | null
           procedure_date?: string
           procedure_type?: string
           quota_task_id?: string | null
+          rejection_reason?: string | null
+          status?: string | null
+          student_id?: string | null
           supervisor_name?: string
         }
         Relationships: [
@@ -112,6 +124,38 @@ export type Database = {
             columns: ["quota_task_id"]
             isOneToOne: false
             referencedRelation: "quota_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]
