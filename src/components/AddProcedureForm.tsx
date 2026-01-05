@@ -27,6 +27,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseClinicalNoteWithAI } from "@/lib/clinicalParser";
+import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AddProcedureForm = () => {
   const { toast } = useToast();
@@ -44,7 +46,9 @@ export const AddProcedureForm = () => {
   // Magic Fill state
   const [magicFillText, setMagicFillText] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [aiCorrectionEnabled, setAiCorrectionEnabled] = useState(true);
   const recognitionRef = useRef<any>(null);
+  const aiCorrectionEnabledRef = useRef(true);
 
   // Track which fields were manually entered (don't overwrite them)
   const [manuallySet, setManuallySet] = useState({
@@ -66,10 +70,31 @@ export const AddProcedureForm = () => {
       recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = 'en-US';
 
-      recognitionRef.current.onresult = (event: any) => {
+      recognitionRef.current.onresult = async (event: any) => {
         const transcript = event.results[0][0].transcript;
-        setMagicFillText(transcript);
-        handleMagicFill(transcript);
+        let finalText = transcript;
+
+        if (aiCorrectionEnabledRef.current) {
+          try {
+            toast({
+              title: "🩺 Cleaning up transcript...",
+              description: "Fixing medical terms and misheard words",
+            });
+
+            const { data, error } = await supabase.functions.invoke('correct-clinical-note', {
+              body: { text: transcript },
+            });
+
+            if (!error && data?.correctedText) {
+              finalText = data.correctedText as string;
+            }
+          } catch (err) {
+            console.warn('AI correction failed, using raw transcript', err);
+          }
+        }
+
+        setMagicFillText(finalText);
+        handleMagicFill(finalText);
       };
 
       recognitionRef.current.onerror = () => {
@@ -85,7 +110,8 @@ export const AddProcedureForm = () => {
         setIsListening(false);
       };
     }
-  }, []);
+  }, [toast]);
+
 
   const handleDepartmentChange = (value: string) => {
     setSelectedDepartment(value);
@@ -269,9 +295,22 @@ export const AddProcedureForm = () => {
             {isListening && (
               <p className="text-xs text-primary animate-pulse">🎤 Listening...</p>
             )}
-            <p className="text-xs text-muted-foreground">
-              Speak or type naturally - AI will auto-fill the fields below
-            </p>
+            <div className="flex items-center justify-between pt-1">
+              <p className="text-xs text-muted-foreground">
+                Speak or type naturally - AI will auto-fill the fields below
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-muted-foreground">AI correction</span>
+                <Switch
+                  checked={aiCorrectionEnabled}
+                  onCheckedChange={(checked) => {
+                    setAiCorrectionEnabled(checked);
+                    aiCorrectionEnabledRef.current = checked;
+                  }}
+                  className="scale-90"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2 animate-fade-in" style={{ animationDelay: "0.05s" }}>

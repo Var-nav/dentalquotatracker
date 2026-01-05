@@ -2,3 +2,6 @@ project_id = "qegaldujnxtcgmziefec"
 
 [functions.parse-clinical-note]
 verify_jwt = false
+
+[functions.correct-clinical-note]
+verify_jwt = false
