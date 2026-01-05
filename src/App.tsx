@@ -90,6 +90,7 @@ const App = () => {
                       <Route path="/account" element={<MyAccountPage />} />
                       <Route path="/batches" element={<ManageBatchesPage />} />
                       <Route path="/admin" element={<AdminDashboard />} />
+                      <Route path="/admin-panel" element={<AdminPanel />} />
                       <Route path="/messages" element={<MessagesPage />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
