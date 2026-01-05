@@ -17,109 +17,88 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
- type TaskStatus = "pending" | "verified" | "rejected";
+type TaskStatus = "pending" | "verified" | "rejected";
 
- interface LogTask {
-  id: number;
-  patientId: string;
+interface LogTask {
+  id: string;
   procedure: string;
   status: TaskStatus;
   date: string;
+  rejection_reason?: string | null;
 }
-
-const INITIAL_TASKS: LogTask[] = [
-  {
-    id: 3,
-    patientId: "CD-304",
-    procedure: "Complete Denture",
-    status: "verified",
-    date: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    patientId: "RC-212",
-    procedure: "Root Canal (Mandibular Molar)",
-    status: "pending",
-    date: new Date().toISOString(),
-  },
-  {
-    id: 1,
-    patientId: "EX-118",
-    procedure: "Simple Extraction",
-    status: "rejected",
-    date: new Date().toISOString(),
-  },
-];
-
-const REQUIRED_TOTAL = 10;
 
 export function StudentLogbook() {
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const [tasks, setTasks] = useState<LogTask[]>(INITIAL_TASKS);
   const [filter, setFilter] = useState<"all" | "pending">("all");
   const [open, setOpen] = useState(false);
 
-  const [patientId, setPatientId] = useState("");
-  const [procedure, setProcedure] = useState("");
+  // Fetch student's procedures
+  const { data: procedures = [], refetch } = useQuery({
+    queryKey: ["student-procedures", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from("procedures")
+        .select("id, procedure_type, status, procedure_date, rejection_reason, quota_task_id")
+        .eq("student_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch task names for procedures
+      const taskIds = [...new Set(data.map(p => p.quota_task_id).filter(Boolean))];
+      const { data: tasks } = await supabase
+        .from("quota_tasks")
+        .select("id, task_name")
+        .in("id", taskIds);
+
+      const taskMap = new Map(tasks?.map(t => [t.id, t.task_name]) || []);
+
+      return data.map(p => ({
+        id: p.id,
+        procedure: taskMap.get(p.quota_task_id!) || p.procedure_type,
+        status: (p.status || "pending") as TaskStatus,
+        date: p.procedure_date,
+        rejection_reason: p.rejection_reason,
+      })) as LogTask[];
+    },
+    enabled: !!user,
+  });
 
   const stats = useMemo(() => {
-    const completed = tasks.filter((t) => t.status === "verified").length;
+    const completed = procedures.filter((t) => t.status === "verified").length;
+    const pending = procedures.filter((t) => t.status === "pending").length;
+    const REQUIRED_TOTAL = 10; // This could come from quota targets
     return {
       required: REQUIRED_TOTAL,
       completed,
-      pending: tasks.length - completed,
+      pending,
+      inProgress: pending,
       progress: Math.min(100, (completed / REQUIRED_TOTAL) * 100),
     };
-  }, [tasks]);
+  }, [procedures]);
 
   const visibleTasks = useMemo(
-    () => (filter === "pending" ? tasks.filter((t) => t.status === "pending") : tasks),
-    [filter, tasks]
+    () => (filter === "pending" ? procedures.filter((t) => t.status === "pending") : procedures),
+    [filter, procedures]
   );
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!patientId.trim() || !procedure.trim()) {
-      toast({
-        title: "Missing details",
-        description: "Please fill in both Patient ID and Procedure.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newTask: LogTask = {
-      id: Date.now(),
-      patientId: patientId.trim(),
-      procedure: procedure.trim(),
-      status: "pending",
-      date: new Date().toISOString(),
-    };
-
-    setTasks((prev) => [newTask, ...prev]);
-
-    setPatientId("");
-    setProcedure("");
-    setOpen(false);
-
-    toast({
-      title: "Entry added",
-      description: "New logbook entry created successfully.",
-    });
-  };
-
   const statusBadgeClasses: Record<TaskStatus, string> = {
-    pending: "bg-warning/10 text-warning-foreground border-warning/40",
+    pending: "bg-blue-500/10 text-blue-600 border-blue-500/40 dark:text-blue-400",
     verified: "bg-success/10 text-success-foreground border-success/40",
     rejected: "bg-destructive/10 text-destructive-foreground border-destructive/40",
   };
 
   const statusLabel: Record<TaskStatus, string> = {
-    pending: "Pending",
-    verified: "Verified",
+    pending: "In Progress",
+    verified: "Completed",
     rejected: "Rejected",
   };
 
@@ -152,63 +131,13 @@ export function StudentLogbook() {
               onClick={() => setFilter("pending")}
               className={`rounded-full px-2 py-1 transition-colors ${
                 filter === "pending"
-                  ? "bg-warning text-warning-foreground"
+                  ? "bg-blue-500 text-white dark:bg-blue-600"
                   : "text-muted-foreground hover:bg-muted/60"
               }`}
             >
-              Pending only
+              In Progress
             </button>
           </div>
-
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="hover-scale">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Entry
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md animate-scale-in">
-              <DialogHeader>
-                <DialogTitle>Add logbook entry</DialogTitle>
-                <DialogDescription>
-                  Capture a new clinical procedure. You can update status later once verified.
-                </DialogDescription>
-              </DialogHeader>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="patientId">
-                    Patient ID
-                  </label>
-                  <Input
-                    id="patientId"
-                    placeholder="e.g. AB-104"
-                    value={patientId}
-                    onChange={(e) => setPatientId(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="procedure">
-                    Procedure
-                  </label>
-                  <Input
-                    id="procedure"
-                    placeholder="e.g. Complete Denture"
-                    value={procedure}
-                    onChange={(e) => setProcedure(e.target.value)}
-                  />
-                </div>
-
-                <DialogFooter className="mt-4">
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">Submit</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
       </CardHeader>
 
@@ -216,10 +145,10 @@ export function StudentLogbook() {
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              {stats.completed} of {stats.required} required procedures verified
+              {stats.completed} of {stats.required} required procedures completed
             </span>
-            <span className="font-medium text-foreground">
-              {stats.pending} pending
+            <span className="font-medium text-blue-600 dark:text-blue-400">
+              {stats.inProgress} in progress
             </span>
           </div>
           <Progress value={stats.progress} className="h-2 overflow-hidden" />
@@ -243,11 +172,11 @@ export function StudentLogbook() {
               onClick={() => setFilter("pending")}
               className={`rounded-full px-2 py-1 border text-[11px] ${
                 filter === "pending"
-                  ? "border-warning bg-warning/10 text-warning-foreground"
+                  ? "border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400"
                   : "border-border text-muted-foreground"
               }`}
             >
-              Pending only
+              In Progress
             </button>
           </div>
         </div>
@@ -277,9 +206,11 @@ export function StudentLogbook() {
                         {statusLabel[task.status]}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Patient ID: <span className="font-medium text-foreground">{task.patientId}</span>
-                    </p>
+                    {task.rejection_reason && (
+                      <p className="text-xs text-destructive">
+                        Rejection: {task.rejection_reason}
+                      </p>
+                    )}
                   </div>
 
                   <div className="shrink-0 text-right text-[11px] text-muted-foreground">
