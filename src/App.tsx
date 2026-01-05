@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Target } from "lucide-react";
 import { UserMetaPill } from "@/components/UserMetaPill";
 import { HeaderUserActions } from "@/components/HeaderUserActions";
+import { THEME_PRESETS, applyThemeColors } from "@/config/themes";
 import Dashboard from "./pages/Dashboard";
 import AddCase from "./pages/AddCase";
 import Analytics from "./pages/Analytics";
@@ -20,9 +22,34 @@ import OnboardingPage from "./pages/Onboarding";
 import AssessmentsPage from "./pages/Assessments";
 import { AuthProvider } from "@/hooks/useAuth";
 
+
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // Initialize theme on app load
+  useEffect(() => {
+    const loadTheme = () => {
+      try {
+        const localTheme = localStorage.getItem("varshify_theme");
+        if (localTheme) {
+          const parsed = JSON.parse(localTheme);
+          const preset = THEME_PRESETS.find((p) => p.id === parsed.preset);
+          if (preset) {
+            const colors = { ...preset.colors };
+            if (parsed.customPrimary) colors.primary = parsed.customPrimary;
+            if (parsed.customSecondary) colors.secondary = parsed.customSecondary;
+            if (parsed.customAccent) colors.accent = parsed.customAccent;
+            applyThemeColors(colors);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load theme on startup", error);
+      }
+    };
+    loadTheme();
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -71,6 +98,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

@@ -131,23 +131,35 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          custom_accent_hsl: string | null
+          custom_primary_hsl: string | null
+          custom_secondary_hsl: string | null
           department_id: string | null
           full_name: string | null
           id: string
+          theme_preset: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          custom_accent_hsl?: string | null
+          custom_primary_hsl?: string | null
+          custom_secondary_hsl?: string | null
           department_id?: string | null
           full_name?: string | null
           id: string
+          theme_preset?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          custom_accent_hsl?: string | null
+          custom_primary_hsl?: string | null
+          custom_secondary_hsl?: string | null
           department_id?: string | null
           full_name?: string | null
           id?: string
+          theme_preset?: string | null
           updated_at?: string
         }
         Relationships: [
