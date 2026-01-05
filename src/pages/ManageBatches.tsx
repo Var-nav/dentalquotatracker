@@ -9,7 +9,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Pencil, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface BatchRow {
   id: string;
@@ -38,6 +56,13 @@ const ManageBatchesPage = () => {
   const [yearOfStudy, setYearOfStudy] = useState("3rd year");
   const [academicYear, setAcademicYear] = useState("2024-2025");
   const [intakeLabel, setIntakeLabel] = useState<"Aug batch" | "Feb batch">("Aug batch");
+
+  const [editingBatch, setEditingBatch] = useState<BatchRow | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editYearOfStudy, setEditYearOfStudy] = useState("");
+  const [editAcademicYear, setEditAcademicYear] = useState("");
+  const [editIntakeLabel, setEditIntakeLabel] = useState<"Aug batch" | "Feb batch">("Aug batch");
+  const [deletingBatchId, setDeletingBatchId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -124,6 +149,98 @@ const handleCreate = async () => {
     setSaving(false);
   }
 };
+
+  const handleEditClick = (batch: BatchRow) => {
+    setEditingBatch(batch);
+    setEditName(batch.name);
+    setEditYearOfStudy(batch.year_of_study || "");
+    setEditAcademicYear(batch.academic_year || "");
+    setEditIntakeLabel((batch.intake_label as "Aug batch" | "Feb batch") || "Aug batch");
+  };
+
+  const handleUpdateBatch = async () => {
+    if (!editingBatch) return;
+
+    const parsed = batchSchema.safeParse({
+      name: editName,
+      year_of_study: editYearOfStudy,
+      academic_year: editAcademicYear,
+      intake_label: editIntakeLabel,
+    });
+
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message ?? "Invalid input";
+      toast({
+        title: "Invalid details",
+        description: firstError,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from("batches")
+        .update(parsed.data)
+        .eq("id", editingBatch.id);
+
+      if (error) throw error;
+
+      setBatches((prev) =>
+        prev.map((b) =>
+          b.id === editingBatch.id
+            ? { ...b, ...parsed.data }
+            : b
+        )
+      );
+      setEditingBatch(null);
+      toast({
+        title: "Batch updated",
+        description: "Batch details have been updated successfully.",
+      });
+    } catch (err: any) {
+      console.error("Failed to update batch", err);
+      toast({
+        title: "Could not update batch",
+        description: err?.message ?? "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteBatch = async () => {
+    if (!deletingBatchId) return;
+
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from("batches")
+        .delete()
+        .eq("id", deletingBatchId);
+
+      if (error) throw error;
+
+      setBatches((prev) => prev.filter((b) => b.id !== deletingBatchId));
+      setDeletingBatchId(null);
+      toast({
+        title: "Batch deleted",
+        description: "Batch has been removed successfully.",
+      });
+    } catch (err: any) {
+      console.error("Failed to delete batch", err);
+      toast({
+        title: "Could not delete batch",
+        description: err?.message ?? "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const groupedByYear = batches.reduce<Record<string, BatchRow[]>>((acc, b) => {
     const key = b.academic_year || "Academic year not set";
     acc[key] = acc[key] || [];
@@ -273,13 +390,31 @@ const handleCreate = async () => {
                                   </button>
                                 </CollapsibleTrigger>
                                 <CollapsibleContent>
-                                  <ul className="text-sm text-foreground grid gap-1 md:grid-cols-2 px-3 pb-3 pt-1">
+                                   <ul className="text-sm text-foreground grid gap-1 md:grid-cols-2 px-3 pb-3 pt-1">
                                     {yearBatchesForIntake.map((b) => (
                                       <li
                                         key={b.id}
-                                        className="rounded-lg border border-border/60 bg-card px-3 py-2 flex items-center justify-between"
+                                        className="rounded-lg border border-border/60 bg-card px-3 py-2 flex items-center justify-between group hover:border-primary/30 transition-colors"
                                       >
                                         <span className="font-medium">{b.name}</span>
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            className="h-7 w-7"
+                                            onClick={() => handleEditClick(b)}
+                                          >
+                                            <Pencil className="h-3.5 w-3.5" />
+                                          </Button>
+                                          <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            className="h-7 w-7 text-destructive hover:text-destructive"
+                                            onClick={() => setDeletingBatchId(b.id)}
+                                          >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                          </Button>
+                                        </div>
                                       </li>
                                     ))}
                                   </ul>
@@ -297,6 +432,117 @@ const handleCreate = async () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingBatch} onOpenChange={(open) => !open && setEditingBatch(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Batch</DialogTitle>
+            <DialogDescription>
+              Update the batch details below. All fields are required.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Sub-batch name</Label>
+              <Select value={editName} onValueChange={setEditName}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select batch (A-Z)" />
+                </SelectTrigger>
+                <SelectContent className="bg-card z-50 max-h-[300px]">
+                  <Collapsible>
+                    <CollapsibleTrigger className="w-full px-2 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-accent rounded flex items-center justify-between">
+                      <span>Batch A - M</span>
+                      <ChevronDown className="h-3 w-3" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      {Array.from({ length: 13 }, (_, i) => String.fromCharCode(65 + i)).map((letter) => (
+                        <SelectItem key={letter} value={`Batch ${letter}`}>
+                          Batch {letter}
+                        </SelectItem>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                  <Collapsible>
+                    <CollapsibleTrigger className="w-full px-2 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-accent rounded flex items-center justify-between">
+                      <span>Batch N - Z</span>
+                      <ChevronDown className="h-3 w-3" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      {Array.from({ length: 13 }, (_, i) => String.fromCharCode(78 + i)).map((letter) => (
+                        <SelectItem key={letter} value={`Batch ${letter}`}>
+                          Batch {letter}
+                        </SelectItem>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Year of study</Label>
+              <Input
+                value={editYearOfStudy}
+                onChange={(e) => setEditYearOfStudy(e.target.value)}
+                placeholder="3rd year"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Academic year</Label>
+              <Input
+                value={editAcademicYear}
+                onChange={(e) => setEditAcademicYear(e.target.value)}
+                placeholder="2024-2025"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Main intake</Label>
+              <Select
+                value={editIntakeLabel}
+                onValueChange={(v) => setEditIntakeLabel(v as "Aug batch" | "Feb batch")}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select intake" />
+                </SelectTrigger>
+                <SelectContent className="bg-card z-50">
+                  <SelectItem value="Aug batch">Aug batch</SelectItem>
+                  <SelectItem value="Feb batch">Feb batch</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingBatch(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateBatch} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingBatchId} onOpenChange={(open) => !open && setDeletingBatchId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this batch. This action cannot be undone.
+              Students assigned to this batch will need to be reassigned.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteBatch}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
