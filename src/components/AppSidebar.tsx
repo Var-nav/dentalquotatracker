@@ -1,4 +1,4 @@
-import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2, Layers3, Calendar, Shield } from "lucide-react";
+import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2, Layers3, Calendar, Shield, MessageSquare } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 
@@ -64,6 +64,13 @@ const navItems = [
     icon: Layers3,
     gradient: "from-amber-500 to-orange-500",
     color: "text-amber-600 dark:text-amber-400",
+  },
+  {
+    title: "Messages",
+    url: "/messages",
+    icon: MessageSquare,
+    gradient: "from-indigo-500 to-purple-500",
+    color: "text-indigo-600 dark:text-indigo-400",
   },
 ];
 
