@@ -26,7 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { parseClinicalNote } from "@/lib/clinicalParser";
+import { parseClinicalNoteWithAI } from "@/lib/clinicalParser";
 
 export const AddProcedureForm = () => {
   const { toast } = useToast();
@@ -122,10 +122,16 @@ export const AddProcedureForm = () => {
     }
   };
 
-  const handleMagicFill = (text: string) => {
+  const handleMagicFill = async (text: string) => {
     if (!text.trim()) return;
 
-    const parsed = parseClinicalNote(text, departments, allTasks);
+    // Show loading state
+    toast({
+      title: "🤖 AI Processing...",
+      description: "Analyzing your clinical note",
+    });
+
+    const parsed = await parseClinicalNoteWithAI(text, departments, allTasks);
 
     // Only auto-fill fields that weren't manually set
     if (parsed.department && !manuallySet.department) {
