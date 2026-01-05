@@ -22,9 +22,9 @@ const MyAccountPage = () => {
 
   const roleLabel = meta.role
     ? meta.role === "student"
-      ? "Student"
+      ? "Learner"
       : meta.role === "instructor"
-      ? "Instructor"
+      ? "Senior learner"
       : "Admin"
     : "Not set";
 

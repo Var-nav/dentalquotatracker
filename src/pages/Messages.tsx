@@ -11,8 +11,8 @@ const Messages = () => {
         <h1 className="text-3xl font-bold mb-2">Messages</h1>
         <p className="text-muted-foreground">
           {meta.role === "instructor"
-            ? "Send messages to students or batches"
-            : "View messages from your instructors"}
+            ? "Send messages to learners or batches"
+            : "View messages from your senior learners"}
         </p>
       </div>
 

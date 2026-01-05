@@ -132,7 +132,7 @@ export function RoleManagement() {
           <UserCog className="h-5 w-5" />
           Role Management
         </CardTitle>
-        <CardDescription>Assign and modify user roles (Admin, Instructor, Student)</CardDescription>
+        <CardDescription>Assign and modify user roles (Admin, Senior learner, Learner)</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -167,8 +167,8 @@ export function RoleManagement() {
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent className="bg-card z-50">
-                      <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="instructor">Instructor</SelectItem>
+                      <SelectItem value="student">Learner</SelectItem>
+                      <SelectItem value="instructor">Senior learner</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>

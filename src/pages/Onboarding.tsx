@@ -159,13 +159,13 @@ const OnboardingPage = () => {
               <div className="flex items-center space-x-2 rounded-lg border border-border/60 bg-card/60 px-3 py-2">
                 <RadioGroupItem value="student" id="role-student" />
                 <Label htmlFor="role-student" className="cursor-pointer">
-                  Student
+                  Learner
                 </Label>
               </div>
               <div className="flex items-center space-x-2 rounded-lg border border-border/60 bg-card/60 px-3 py-2">
                 <RadioGroupItem value="instructor" id="role-instructor" />
                 <Label htmlFor="role-instructor" className="cursor-pointer">
-                  Instructor
+                  Senior learner
                 </Label>
               </div>
             </RadioGroup>
