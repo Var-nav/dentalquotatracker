@@ -1,6 +1,7 @@
 import { DepartmentAnalytics } from "@/components/DepartmentAnalytics";
 import { InstructorSupervisorPanel } from "@/components/InstructorSupervisorPanel";
 import { PeerComparisonChart } from "@/components/PeerComparisonChart";
+import { BatchTrendsChart } from "@/components/BatchTrendsChart";
 
 const Analytics = () => {
   return (
@@ -15,6 +16,7 @@ const Analytics = () => {
       </div>
 
       <PeerComparisonChart />
+      <BatchTrendsChart />
       <DepartmentAnalytics />
       <InstructorSupervisorPanel />
     </div>
