@@ -4,6 +4,7 @@ import { useDepartments } from "@/hooks/useDepartments";
 import { useQuotaTasks } from "@/hooks/useQuotaTasks";
 import { DepartmentAccordion } from "@/components/DepartmentAccordion";
 import { GamificationWidget } from "@/components/GamificationWidget";
+import { AiRiskRadar } from "@/components/AiRiskRadar";
 import { useUserMeta } from "@/hooks/useUserMeta";
 import { Target } from "lucide-react";
 
@@ -26,8 +27,13 @@ const Dashboard = () => {
         </p>
       </div>
 
-      {/* Gamification Widget - Only for Students */}
-      {isStudent && <GamificationWidget />}
+      {/* AI-Powered Features - Only for Students */}
+      {isStudent && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <GamificationWidget />
+          <AiRiskRadar />
+        </div>
+      )}
 
       <Card className="border border-primary/20 bg-gradient-to-br from-card via-primary/5 to-card shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
         <CardHeader className="flex flex-row items-center gap-3 pb-4">
