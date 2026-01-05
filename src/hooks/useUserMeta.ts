@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export interface UserMeta {
-  role: "student" | "instructor" | "admin" | null;
+  role: "student" | "instructor" | "admin" | "co-admin" | null;
   batchName: string | null;
   yearOfStudy: string | null;
   academicYear: string | null;

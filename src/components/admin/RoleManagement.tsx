@@ -163,12 +163,13 @@ export function RoleManagement() {
                     onValueChange={(value) => handleRoleChange(user.id, value as Enums<"app_role">)}
                     disabled={updating === user.id}
                   >
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent className="bg-card z-50">
                       <SelectItem value="student">Learner</SelectItem>
                       <SelectItem value="instructor">Senior learner</SelectItem>
+                      <SelectItem value="co-admin">Co-Admin</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
