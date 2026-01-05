@@ -145,11 +145,39 @@ const handleCreate = async () => {
         <CardContent className="grid gap-4 md:grid-cols-4">
           <div className="space-y-2 md:col-span-2">
             <Label>Sub-batch name</Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="H batch"
-            />
+            <Select value={name} onValueChange={setName}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select batch (A-Z)" />
+              </SelectTrigger>
+              <SelectContent className="bg-card z-50 max-h-[300px]">
+                <Collapsible>
+                  <CollapsibleTrigger className="w-full px-2 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-accent rounded flex items-center justify-between">
+                    <span>Batch A - M</span>
+                    <ChevronDown className="h-3 w-3" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    {Array.from({ length: 13 }, (_, i) => String.fromCharCode(65 + i)).map((letter) => (
+                      <SelectItem key={letter} value={`Batch ${letter}`}>
+                        Batch {letter}
+                      </SelectItem>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+                <Collapsible>
+                  <CollapsibleTrigger className="w-full px-2 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-accent rounded flex items-center justify-between">
+                    <span>Batch N - Z</span>
+                    <ChevronDown className="h-3 w-3" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    {Array.from({ length: 13 }, (_, i) => String.fromCharCode(78 + i)).map((letter) => (
+                      <SelectItem key={letter} value={`Batch ${letter}`}>
+                        Batch {letter}
+                      </SelectItem>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label>Year of study</Label>
