@@ -1,4 +1,4 @@
-import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2, Layers3, Calendar, Shield, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Plus, TrendingUp, List, Target, UserCircle2, Layers3, Shield, MessageSquare } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 
@@ -36,13 +36,6 @@ const navItems = [
     icon: TrendingUp,
     gradient: "from-green-500 to-emerald-500",
     color: "text-green-600 dark:text-green-400",
-  },
-  {
-    title: "Assessments",
-    url: "/assessments",
-    icon: Calendar,
-    gradient: "from-teal-500 to-emerald-500",
-    color: "text-teal-600 dark:text-teal-400",
   },
   {
     title: "Case History",
