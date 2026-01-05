@@ -271,6 +271,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_batch_comparison_stats: { Args: never; Returns: Json }
+      get_student_vs_batch_stats: {
+        Args: { student_batch: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
