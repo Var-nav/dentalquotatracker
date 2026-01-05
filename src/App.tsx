@@ -40,8 +40,8 @@ const App = () => (
                       <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple via-primary to-teal flex items-center justify-center shadow-md">
                         <Target className="h-4 w-4 text-white" />
                       </div>
-                      <h1 className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
-                        Quoto Tracker
+                      <h1 className="text-2xl font-cursive font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
+                        Varshify
                       </h1>
                     </div>
                   </div>

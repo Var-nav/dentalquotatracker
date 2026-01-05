@@ -23,7 +23,7 @@ export function HeaderUserActions() {
       navigate("/auth", { replace: true });
       toast({
         title: "Signed out",
-        description: "You have been logged out of Quoto Tracker.",
+        description: "You have been logged out of Varshify.",
       });
     } catch (error: any) {
       console.error("Logout error", error);
