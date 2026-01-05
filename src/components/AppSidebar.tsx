@@ -61,13 +61,6 @@ const accountNavItems = [
     gradient: "from-slate-500 to-slate-700",
     color: "text-muted-foreground",
   },
-  {
-    title: "Batches",
-    url: "/batches",
-    icon: Layers3,
-    gradient: "from-amber-500 to-orange-500",
-    color: "text-amber-600 dark:text-amber-400",
-  },
 ];
 
 const adminNavItems = [
@@ -85,6 +78,14 @@ const adminNavItems = [
     icon: Shield,
     gradient: "from-violet-500 to-purple-500",
     color: "text-violet-600 dark:text-violet-400",
+    adminOnly: true,
+  },
+  {
+    title: "Manage Batches",
+    url: "/batches",
+    icon: Layers3,
+    gradient: "from-amber-500 to-orange-500",
+    color: "text-amber-600 dark:text-amber-400",
     adminOnly: true,
   },
 ];
