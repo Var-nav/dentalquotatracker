@@ -5,13 +5,17 @@ export type ProcedureType = "Restorations" | "Extractions" | "Root Canals";
 
 export interface Procedure {
   id: string;
-  patient_name: string;
+  patient_name?: string | null;
   procedure_type: ProcedureType;
   procedure_date: string;
   supervisor_name: string;
   created_at?: string;
   department_id?: string | null;
   quota_task_id?: string | null;
+  status?: string | null;
+  student_id?: string | null;
+  patient_op_number?: string | null;
+  rejection_reason?: string | null;
 }
 
 export const useProcedures = () => {
