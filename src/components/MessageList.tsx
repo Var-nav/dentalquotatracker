@@ -110,7 +110,7 @@ export const MessageList = () => {
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="font-medium">
-                {sender?.full_name || "Instructor"}
+                {sender?.full_name || "Senior learner"}
               </span>
               {message.batch_id ? (
                 <Badge variant="secondary">Batch Message</Badge>

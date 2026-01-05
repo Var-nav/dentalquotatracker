@@ -85,7 +85,7 @@ export const MessageComposer = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="batch">Send to Batch</SelectItem>
-              <SelectItem value="student">Send to Student</SelectItem>
+              <SelectItem value="student">Send to Learner</SelectItem>
             </SelectContent>
           </Select>
 

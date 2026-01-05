@@ -22,8 +22,10 @@ export function UserMetaPill() {
 
   const roleLabel = meta.role
     ? meta.role === "student"
-      ? "Student"
-      : "Instructor"
+      ? "Learner"
+      : meta.role === "instructor"
+      ? "Senior learner"
+      : "Admin"
     : "Role not set";
 
   const parts: string[] = [];
