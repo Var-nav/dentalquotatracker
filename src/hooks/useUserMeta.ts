@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export interface UserMeta {
-  role: "student" | "instructor" | null;
+  role: "student" | "instructor" | "admin" | null;
   batchName: string | null;
   yearOfStudy: string | null;
   academicYear: string | null;
@@ -70,7 +70,7 @@ export const useUserMeta = () => {
 
         if (!cancelled) {
           setMeta({
-            role: (roleRow?.role as "student" | "instructor" | null) ?? null,
+            role: (roleRow?.role as "student" | "instructor" | "admin" | null) ?? null,
             batchName,
             yearOfStudy,
             academicYear,

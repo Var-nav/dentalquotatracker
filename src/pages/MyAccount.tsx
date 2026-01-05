@@ -23,7 +23,9 @@ const MyAccountPage = () => {
   const roleLabel = meta.role
     ? meta.role === "student"
       ? "Student"
-      : "Instructor"
+      : meta.role === "instructor"
+      ? "Instructor"
+      : "Admin"
     : "Not set";
 
   const batchParts: string[] = [];
