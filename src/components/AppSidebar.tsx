@@ -109,8 +109,8 @@ export function AppSidebar() {
             </div>
             {open && (
               <div className="overflow-hidden animate-fade-in">
-                <h2 className="font-bold text-base truncate bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
-                  Clinical Quota
+                <h2 className="font-cursive font-bold text-base truncate bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
+                  Varshify
                 </h2>
                 <p className="text-xs text-muted-foreground font-medium">Tracker Dashboard</p>
               </div>
