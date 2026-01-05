@@ -298,19 +298,31 @@ const handleCreate = async () => {
           </div>
           <div className="space-y-2">
             <Label>Year of study</Label>
-            <Input
-              value={yearOfStudy}
-              onChange={(e) => setYearOfStudy(e.target.value)}
-              placeholder="3rd year"
-            />
+            <Select value={yearOfStudy} onValueChange={setYearOfStudy}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select year" />
+              </SelectTrigger>
+              <SelectContent className="bg-card z-50">
+                <SelectItem value="3rd year">3rd year</SelectItem>
+                <SelectItem value="Final year">Final year</SelectItem>
+                <SelectItem value="CRRI">CRRI</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label>Academic year</Label>
-            <Input
-              value={academicYear}
-              onChange={(e) => setAcademicYear(e.target.value)}
-              placeholder="2024-2025"
-            />
+            <Select value={academicYear} onValueChange={setAcademicYear}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select academic year" />
+              </SelectTrigger>
+              <SelectContent className="bg-card z-50">
+                <SelectItem value="2023-2024">2023-2024</SelectItem>
+                <SelectItem value="2024-2025">2024-2025</SelectItem>
+                <SelectItem value="2025-2026">2025-2026</SelectItem>
+                <SelectItem value="2026-2027">2026-2027</SelectItem>
+                <SelectItem value="2027-2028">2027-2028</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label>Main intake</Label>
@@ -481,19 +493,31 @@ const handleCreate = async () => {
             </div>
             <div className="space-y-2">
               <Label>Year of study</Label>
-              <Input
-                value={editYearOfStudy}
-                onChange={(e) => setEditYearOfStudy(e.target.value)}
-                placeholder="3rd year"
-              />
+              <Select value={editYearOfStudy} onValueChange={setEditYearOfStudy}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent className="bg-card z-50">
+                  <SelectItem value="3rd year">3rd year</SelectItem>
+                  <SelectItem value="Final year">Final year</SelectItem>
+                  <SelectItem value="CRRI">CRRI</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Academic year</Label>
-              <Input
-                value={editAcademicYear}
-                onChange={(e) => setEditAcademicYear(e.target.value)}
-                placeholder="2024-2025"
-              />
+              <Select value={editAcademicYear} onValueChange={setEditAcademicYear}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select academic year" />
+                </SelectTrigger>
+                <SelectContent className="bg-card z-50">
+                  <SelectItem value="2023-2024">2023-2024</SelectItem>
+                  <SelectItem value="2024-2025">2024-2025</SelectItem>
+                  <SelectItem value="2025-2026">2025-2026</SelectItem>
+                  <SelectItem value="2026-2027">2026-2027</SelectItem>
+                  <SelectItem value="2027-2028">2027-2028</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Main intake</Label>
