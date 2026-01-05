@@ -75,6 +75,53 @@ const AuthPage = () => {
         throw new Error("Login failed. Please try again.");
       }
 
+      // Check whitelist_invites and auto-assign role/batch/department
+      const { data: inviteData } = await supabase
+        .from("whitelist_invites")
+        .select("assigned_role, assigned_batch, assigned_department")
+        .eq("email", user.email)
+        .maybeSingle();
+
+      if (inviteData) {
+        // Create user_roles entry if not exists
+        const { data: existingRole } = await supabase
+          .from("user_roles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (!existingRole) {
+          await supabase.from("user_roles").insert({
+            user_id: user.id,
+            role: inviteData.assigned_role,
+          });
+        }
+
+        // Create user_batches entry if assigned_batch exists and not already assigned
+        if (inviteData.assigned_batch) {
+          const { data: existingBatch } = await supabase
+            .from("user_batches")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          if (!existingBatch) {
+            await supabase.from("user_batches").insert({
+              user_id: user.id,
+              batch_id: inviteData.assigned_batch,
+            });
+          }
+        }
+
+        // Update profile with assigned_department if provided
+        if (inviteData.assigned_department) {
+          await supabase
+            .from("profiles")
+            .update({ department_id: inviteData.assigned_department })
+            .eq("id", user.id);
+        }
+      }
+
       const { data: roleData } = await supabase
         .from("user_roles")
         .select("id")
