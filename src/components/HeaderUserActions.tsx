@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { UserMetaPill } from "@/components/UserMetaPill";
 import { NotificationBell } from "@/components/NotificationBell";
+import { NotificationPermissionButton } from "@/components/NotificationPermissionButton";
 
 const HIDDEN_PATHS = ["/auth", "/onboarding"] as const;
 
@@ -38,6 +39,7 @@ export function HeaderUserActions() {
 
   return (
     <div className="flex items-center gap-3">
+      <NotificationPermissionButton />
       <NotificationBell />
       <UserMetaPill />
       <Button

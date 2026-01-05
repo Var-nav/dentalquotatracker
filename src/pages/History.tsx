@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EditProcedureDialog } from "@/components/EditProcedureDialog";
+import { ExportLogbookButton } from "@/components/ExportLogbookButton";
 import { useProcedures, Procedure } from "@/hooks/useProcedures";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useQuotaTasks } from "@/hooks/useQuotaTasks";
@@ -106,13 +107,16 @@ const History = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
-          Case History
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          View, edit, and manage all logged procedures
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple via-primary to-teal">
+            Case History
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            View, edit, and manage all logged procedures
+          </p>
+        </div>
+        <ExportLogbookButton />
       </div>
 
       <Card className="border border-primary/20 bg-gradient-to-br from-card via-primary/5 to-card shadow-soft backdrop-blur-sm">

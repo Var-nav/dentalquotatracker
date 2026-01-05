@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "./useAuth";
+import { usePushNotifications } from "./usePushNotifications";
 
 export type ProcedureType = "Restorations" | "Extractions" | "Root Canals";
 
@@ -20,6 +24,9 @@ export interface Procedure {
 
 export const useProcedures = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { sendLocalNotification } = usePushNotifications();
 
   const { data: procedures = [], isLoading } = useQuery({
     queryKey: ["procedures"],
@@ -33,6 +40,69 @@ export const useProcedures = () => {
       return data as Procedure[];
     },
   });
+
+  // Real-time subscription for procedures
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("procedures-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "procedures",
+        },
+        (payload) => {
+          console.log("Real-time procedure update:", payload);
+
+          // Update cache immediately
+          if (payload.eventType === "INSERT") {
+            queryClient.setQueryData<Procedure[]>(["procedures"], (old = []) => [
+              payload.new as Procedure,
+              ...old,
+            ]);
+          } else if (payload.eventType === "UPDATE") {
+            queryClient.setQueryData<Procedure[]>(["procedures"], (old = []) =>
+              old.map((proc) =>
+                proc.id === payload.new.id ? (payload.new as Procedure) : proc
+              )
+            );
+
+            // Show toast if status changed to verified
+            if (
+              payload.new.status === "verified" &&
+              payload.old.status !== "verified" &&
+              payload.new.student_id === user.id
+            ) {
+              toast({
+                title: "Procedure Verified! ✅",
+                description: "Your case has been approved by the supervisor.",
+              });
+
+              // Send push notification
+              sendLocalNotification(
+                "Procedure Verified! ✅",
+                "Your case has been approved by the supervisor."
+              );
+            }
+          } else if (payload.eventType === "DELETE") {
+            queryClient.setQueryData<Procedure[]>(["procedures"], (old = []) =>
+              old.filter((proc) => proc.id !== payload.old.id)
+            );
+          }
+
+          // Also invalidate to refetch in background
+          queryClient.invalidateQueries({ queryKey: ["procedures"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient, toast, sendLocalNotification]);
 
   const addProcedure = useMutation({
     mutationFn: async (
