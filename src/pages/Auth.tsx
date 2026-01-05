@@ -82,6 +82,8 @@ const AuthPage = () => {
         .eq("email", user.email)
         .maybeSingle();
 
+      let wasAutoAssigned = false;
+
       if (inviteData) {
         // Create user_roles entry if not exists
         const { data: existingRole } = await supabase
@@ -95,6 +97,7 @@ const AuthPage = () => {
             user_id: user.id,
             role: inviteData.assigned_role,
           });
+          wasAutoAssigned = true;
         }
 
         // Create user_batches entry if assigned_batch exists and not already assigned
@@ -110,6 +113,7 @@ const AuthPage = () => {
               user_id: user.id,
               batch_id: inviteData.assigned_batch,
             });
+            wasAutoAssigned = true;
           }
         }
 
@@ -119,6 +123,47 @@ const AuthPage = () => {
             .from("profiles")
             .update({ department_id: inviteData.assigned_department })
             .eq("id", user.id);
+        }
+
+        // Show confirmation toast with assignment details
+        if (wasAutoAssigned) {
+          const roleLabel = {
+            student: "Learner",
+            instructor: "Senior learner",
+            admin: "Admin",
+            "co-admin": "Co-Admin",
+          }[inviteData.assigned_role] || inviteData.assigned_role;
+
+          let assignmentDetails = `Role: ${roleLabel}`;
+
+          if (inviteData.assigned_batch) {
+            const { data: batchData } = await supabase
+              .from("batches")
+              .select("name")
+              .eq("id", inviteData.assigned_batch)
+              .single();
+            
+            if (batchData) {
+              assignmentDetails += `, Batch: ${batchData.name}`;
+            }
+          }
+
+          if (inviteData.assigned_department) {
+            const { data: deptData } = await supabase
+              .from("departments")
+              .select("name")
+              .eq("id", inviteData.assigned_department)
+              .single();
+            
+            if (deptData) {
+              assignmentDetails += `, Department: ${deptData.name}`;
+            }
+          }
+
+          toast({
+            title: "Welcome! Your account has been set up",
+            description: assignmentDetails,
+          });
         }
       }
 
