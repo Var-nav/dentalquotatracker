@@ -76,11 +76,19 @@ const navItems = [
 
 const adminNavItems = [
   {
-    title: "Admin Panel",
+    title: "Admin Dashboard",
     url: "/admin",
     icon: Shield,
     gradient: "from-red-500 to-rose-500",
     color: "text-red-600 dark:text-red-400",
+    adminOnly: true,
+  },
+  {
+    title: "User Management",
+    url: "/admin-panel",
+    icon: Shield,
+    gradient: "from-violet-500 to-purple-500",
+    color: "text-violet-600 dark:text-violet-400",
     adminOnly: true,
   },
 ];
