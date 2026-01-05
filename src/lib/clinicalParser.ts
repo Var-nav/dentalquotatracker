@@ -1,5 +1,6 @@
 import { Department } from "@/hooks/useDepartments";
 import { QuotaTask } from "@/hooks/useQuotaTasks";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ParsedData {
   department?: string;
@@ -8,10 +9,55 @@ interface ParsedData {
 }
 
 /**
- * Parse clinical note text using regex/keyword approach
+ * Parse clinical note text using AI-powered structured extraction
+ * Falls back to regex/keyword approach if API fails
+ */
+export async function parseClinicalNoteWithAI(
+  text: string,
+  departments: Department[],
+  tasks: QuotaTask[]
+): Promise<ParsedData> {
+  try {
+    // Try AI parsing first
+    const { data, error } = await supabase.functions.invoke('parse-clinical-note', {
+      body: {
+        text,
+        departments: departments.map(d => ({ id: d.id, name: d.name })),
+        tasks: tasks.map(t => ({ 
+          id: t.id, 
+          task_name: t.task_name,
+          department_id: t.department_id 
+        }))
+      }
+    });
+
+    if (error) {
+      console.warn('AI parsing failed, falling back to regex:', error);
+      return parseClinicalNoteRegex(text, departments, tasks);
+    }
+
+    // Return AI result if we got valid data
+    if (data && (data.department || data.task || data.supervisorName)) {
+      return {
+        department: data.department,
+        task: data.task,
+        supervisorName: data.supervisorName
+      };
+    }
+
+    // Fall back to regex if AI returned empty
+    return parseClinicalNoteRegex(text, departments, tasks);
+  } catch (error) {
+    console.warn('AI parsing error, falling back to regex:', error);
+    return parseClinicalNoteRegex(text, departments, tasks);
+  }
+}
+
+/**
+ * Parse clinical note text using regex/keyword approach (fallback method)
  * Detects department, procedure type, and supervisor name
  */
-export function parseClinicalNote(
+function parseClinicalNoteRegex(
   text: string,
   departments: Department[],
   tasks: QuotaTask[]
