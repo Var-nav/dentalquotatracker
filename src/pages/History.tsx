@@ -89,23 +89,31 @@ const History = () => {
 
   const getDepartmentName = (deptId: string | null | undefined) => {
     if (!deptId) return "Unknown";
-    return departments.find(d => d.id === deptId)?.name || "Unknown";
+    return departments.find((d) => d.id === deptId)?.name || "Unknown";
   };
 
   const getTaskName = (taskId: string | null | undefined) => {
     if (!taskId) return null;
-    return allTasks.find(t => t.id === taskId)?.task_name;
+    return allTasks.find((t) => t.id === taskId)?.task_name;
   };
 
   const departmentColors: Record<string, string> = {
-    'Oral Maxillofacial Surgery': 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/30',
-    'Oral Medicine and Radiology': 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30',
-    'Periodontics': 'bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/30',
-    'Pediatric Dentistry': 'bg-pink-500/10 text-pink-700 dark:text-pink-300 border-pink-500/30',
-    'Endodontics': 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30',
-    'Prosthodontics': 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30',
-    'Orthodontics': 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30',
-    'Public Health Dentistry': 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30',
+    "Oral Maxillofacial Surgery":
+      "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/30",
+    "Oral Medicine and Radiology":
+      "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30",
+    Periodontics:
+      "bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/30",
+    "Pediatric Dentistry":
+      "bg-pink-500/10 text-pink-700 dark:text-pink-300 border-pink-500/30",
+    Endodontics:
+      "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30",
+    Prosthodontics:
+      "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30",
+    Orthodontics:
+      "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30",
+    "Public Health Dentistry":
+      "bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30",
   };
 
   return (
@@ -155,19 +163,33 @@ const History = () => {
         </CardHeader>
         <CardContent>
           {filteredProcedures.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-12 text-center">
-              <p className="text-muted-foreground">
-                {searchQuery || filterDepartment !== "all"
-                  ? "No cases match your filters"
-                  : "No cases logged yet. Add your first case to get started!"}
-              </p>
-            </div>
+            procedures.length === 0 && !searchQuery && filterDepartment === "all" ? (
+              <div className="rounded-xl border border-dashed border-border/70 bg-card/60 p-8 sm:p-10 text-center flex flex-col items-center gap-4">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-1">
+                  <span className="text-2xl">📘</span>
+                </div>
+                <div className="space-y-1 max-w-md">
+                  <h2 className="text-lg font-semibold text-foreground">No cases yet</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Start your logbook by adding your first patient case. Each case you add will appear here for easy review and export.
+                  </p>
+                </div>
+                <Button asChild className="mt-2 px-6">
+                  <a href="/add-case">Add your first case</a>
+                </Button>
+              </div>
+            ) : (
+              <div className="rounded-md border border-dashed border-border/70 bg-muted/40 p-12 text-center">
+                <p className="text-muted-foreground">No cases match your filters</p>
+              </div>
+            )
           ) : (
             <div className="space-y-3">
               {filteredProcedures.map((entry, index) => {
                 const deptName = getDepartmentName(entry.department_id);
                 const taskName = getTaskName(entry.quota_task_id);
-                const badgeColor = departmentColors[deptName] || 'bg-muted text-muted-foreground';
+                const badgeColor =
+                  departmentColors[deptName] || "bg-muted text-muted-foreground";
 
                 return (
                   <div
@@ -183,10 +205,11 @@ const History = () => {
                             {deptName}
                           </Badge>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
                           <div>
-                            <span className="font-medium text-foreground">Task:</span> {taskName || entry.procedure_type}
+                            <span className="font-medium text-foreground">Task:</span>{" "}
+                            {taskName || entry.procedure_type}
                           </div>
                           <div>
                             <span className="font-medium text-foreground">Date:</span>{" "}
@@ -213,7 +236,9 @@ const History = () => {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-destructive transition-all duration-200 hover:scale-110 hover:bg-destructive/10 hover:text-destructive active:scale-95"
-                          onClick={() => handleDeleteProcedure(entry.id, entry.patient_name)}
+                          onClick={() =>
+                            handleDeleteProcedure(entry.id, entry.patient_name)
+                          }
                           title="Delete case"
                         >
                           <Trash2 className="h-4 w-4" />
