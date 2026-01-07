@@ -235,10 +235,16 @@ export const AddProcedureForm = () => {
         title: "Case logged! Marked as In Progress.",
         description: `${task?.task_name} has been submitted for verification.`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error adding case", error);
+      const message =
+        error?.message ||
+        error?.details ||
+        "Could not save the case. Please try again.";
+
       toast({
         title: "Error adding case",
-        description: "Could not save the case. Please try again.",
+        description: message,
         variant: "destructive",
       });
     } finally {
