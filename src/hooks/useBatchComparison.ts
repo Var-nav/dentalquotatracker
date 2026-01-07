@@ -21,7 +21,7 @@ export const useBatchComparison = () => {
     queryFn: async () => {
       if (!user) throw new Error("No user");
 
-      // 1. Get user's batch
+      // 1. Try to get user's batch
       const { data: userBatch, error: batchError } = await supabase
         .from("user_batches")
         .select("batch_id, batches(name)")
@@ -29,14 +29,29 @@ export const useBatchComparison = () => {
         .maybeSingle();
 
       if (batchError) throw batchError;
-      if (!userBatch) return [];
 
-      const batchName = (userBatch.batches as any)?.name;
-      if (!batchName) return [];
+      let batchName: string | undefined = (userBatch as any)?.batches?.name;
 
-      // 2. Get batch average stats via RPC
-      const { data: batchStats, error: statsError } = await supabase
-        .rpc("get_student_vs_batch_stats", { student_batch: batchName });
+      // If user is not in a batch yet, fall back to the first batch that has data
+      if (!batchName) {
+        const { data: overallStats, error: overallError } = await supabase.rpc(
+          "get_batch_comparison_stats"
+        );
+        if (overallError) throw overallError;
+
+        const overallArray = Array.isArray(overallStats)
+          ? (overallStats as any[])
+          : [];
+        batchName = overallArray[0]?.batch as string | undefined;
+
+        if (!batchName) return [];
+      }
+
+      // 2. Get batch average stats via RPC for the selected batch
+      const { data: batchStats, error: statsError } = await supabase.rpc(
+        "get_student_vs_batch_stats",
+        { student_batch: batchName }
+      );
 
       if (statsError) throw statsError;
 
@@ -59,7 +74,9 @@ export const useBatchComparison = () => {
       });
 
       // 4. Combine the data
-      const batchStatsArray = Array.isArray(batchStats) ? batchStats : [];
+      const batchStatsArray = Array.isArray(batchStats)
+        ? (batchStats as any[])
+        : [];
       const result: DepartmentCount[] = batchStatsArray.map((stat: any) => ({
         department: stat.department,
         myCount: userCounts[stat.department] || 0,
