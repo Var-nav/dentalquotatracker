@@ -88,7 +88,11 @@ const OnboardingPage = () => {
         user_id: user.id,
         role: parsed.data.role,
       });
-      if (roleError) throw roleError;
+
+      // Ignore duplicate role errors so users can safely re-submit
+      if (roleError && (roleError as any).code !== "23505") {
+        throw roleError;
+      }
 
       toast({
         title: "Profile updated",
