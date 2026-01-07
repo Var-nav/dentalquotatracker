@@ -32,11 +32,14 @@ const History = () => {
 
   const filteredProcedures = useMemo(() => {
     return procedures.filter((proc) => {
-      const matchesSearch = 
-        proc.patient_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        proc.supervisor_name.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesDepartment = 
+      const patientName = (proc.patient_name ?? "").toLowerCase();
+      const supervisorName = (proc.supervisor_name ?? "").toLowerCase();
+      const query = searchQuery.toLowerCase();
+
+      const matchesSearch =
+        patientName.includes(query) || supervisorName.includes(query);
+
+      const matchesDepartment =
         filterDepartment === "all" || proc.department_id === filterDepartment;
 
       return matchesSearch && matchesDepartment;
